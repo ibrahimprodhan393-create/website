@@ -1,8 +1,9 @@
 const STORAGE_KEY = "activationAccessData.v1";
 const DEFAULT_ADMIN_PASSWORD = "ADMIN-2026";
 const DAY_MS = 24 * 60 * 60 * 1000;
-const FINAL_PREVIEW_CAP_MS = 15000;
 const SERIAL_INSTALL_DURATION_MS = 2 * 60 * 1000;
+const MIN_FINAL_LOADING_MINUTES = 60;
+const MAX_FINAL_LOADING_MINUTES = 80;
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -105,6 +106,7 @@ const elements = {
   featureId: $("#featureId"),
   featureName: $("#featureName"),
   featureIcon: $("#featureIcon"),
+  featurePhoto: $("#featurePhoto"),
   featureDescription: $("#featureDescription"),
   featureStatus: $("#featureStatus"),
   saveFeatureButton: $("#saveFeatureButton"),
@@ -166,9 +168,10 @@ function seedData() {
     settings: {
       adminPassword: DEFAULT_ADMIN_PASSWORD,
       contactLabel: "WhatsApp Admin",
-      contactValue: "WhatsApp: +8801000000000",
-      contactMode: "copy"
+      contactValue: "https://wa.me/8801000000000",
+      contactMode: "auto"
     },
+    featureStateDefaultMode: "deactivated",
     userFeatureStates: {},
     features,
     packages: [
@@ -190,8 +193,8 @@ function seedData() {
         contactInfo: "WhatsApp: +8801000000000",
         legalInfo: "Regulatory model and access terms verified for this device.",
         packageDetails: "Starter access package with selected essential modules.",
-        loadingPreset: "50",
-        loadingMinutes: 50,
+        loadingPreset: "60",
+        loadingMinutes: 60,
         finalMessage: "Access Activated Successfully",
         featureIds: ["feat_aimbot", "feat_aimkey"]
       },
@@ -236,8 +239,8 @@ function seedData() {
         contactInfo: "https://example.com/support",
         legalInfo: "Full package authorization is active for the registered device profile.",
         packageDetails: "Ultimate package with all modules and extended access duration.",
-        loadingPreset: "90",
-        loadingMinutes: 90,
+        loadingPreset: "80",
+        loadingMinutes: 80,
         finalMessage: "Installation Complete",
         featureIds: features.map((feature) => feature.id)
       }
@@ -256,21 +259,25 @@ function loadData() {
 
 function normalizeData(data) {
   const defaults = seedData();
+  const hasDeactivatedFeatureDefaults = data.featureStateDefaultMode === "deactivated";
   return {
     settings: {
       ...defaults.settings,
       ...(data.settings || {})
     },
+    featureStateDefaultMode: "deactivated",
     features: (data.features || defaults.features).map((feature) => ({
       ...feature,
-      icon: feature.icon || feature.name.slice(0, 2).toUpperCase()
+      icon: feature.icon || feature.name.slice(0, 2).toUpperCase(),
+      image: feature.image || ""
     })),
-    userFeatureStates: data.userFeatureStates || {},
+    userFeatureStates: hasDeactivatedFeatureDefaults ? data.userFeatureStates || {} : {},
     packages: (data.packages || defaults.packages).map((pkg) => ({
       ...pkg,
       deviceName: pkg.deviceName || "Registered Device",
       legalInfo: pkg.legalInfo || "Legal and regulatory access details are assigned by the admin.",
-      packageDetails: pkg.packageDetails || "Package details are assigned by the admin."
+      packageDetails: pkg.packageDetails || "Package details are assigned by the admin.",
+      loadingMinutes: getFinalLoadingMinutes(pkg)
     }))
   };
 }
@@ -387,7 +394,7 @@ function getFeatureStateMap(pkg, visibleFeatures = getVisibleFeatures(pkg)) {
   appData.userFeatureStates[pkg.id] ||= {};
   visibleFeatures.forEach((feature) => {
     if (typeof appData.userFeatureStates[pkg.id][feature.id] !== "boolean") {
-      appData.userFeatureStates[pkg.id][feature.id] = true;
+      appData.userFeatureStates[pkg.id][feature.id] = false;
     }
   });
   return appData.userFeatureStates[pkg.id];
@@ -422,7 +429,7 @@ function renderFeatureModules(pkg) {
       const enabled = featureStateMap[feature.id];
       return `
         <article class="feature-card console-feature-card ${enabled ? "is-enabled" : "is-disabled"}">
-          <span class="feature-icon">${escapeHtml(getFeatureIcon(feature))}</span>
+          ${renderFeatureIconMarkup(feature)}
           <div>
             <div class="feature-title-row">
               <h4>${escapeHtml(feature.name)}</h4>
@@ -462,6 +469,7 @@ function renderDashboard(pkg) {
 
 function resetInstallFlow() {
   clearActiveTimer();
+  elements.dashboardView.classList.remove("install-mode");
   setInstallState("Waiting");
   setStage("start");
   elements.activationCodeOutput.value = "";
@@ -513,7 +521,7 @@ function setProgress(bar, percentElement, value) {
   percentElement.textContent = `${safeValue}%`;
 }
 
-function runProgress({ bar, percentElement, statusElement, titleElement, title, messages, duration, onDone }) {
+function runProgress({ bar, percentElement, statusElement, titleElement, title, messages, duration, onDone, tickMs = 80 }) {
   clearActiveTimer();
   if (titleElement && title) titleElement.textContent = title;
   const started = Date.now();
@@ -532,7 +540,7 @@ function runProgress({ bar, percentElement, statusElement, titleElement, title, 
       clearActiveTimer();
       onDone();
     }
-  }, 80);
+  }, tickMs);
 }
 
 function clearActiveTimer() {
@@ -553,6 +561,8 @@ function startInstall() {
 
   const code = generateActivationCode();
   elements.activationCodeOutput.value = code;
+  elements.dashboardView.classList.add("install-mode");
+  window.scrollTo({ top: 0, behavior: "smooth" });
   setInstallState("Activation");
   setStage("activation");
   updateStepDots("serial");
@@ -607,8 +617,8 @@ function startFileLoading() {
 
 function startFinalLoading() {
   const pkg = getActivePackage();
-  const loadingMinutes = Math.max(1, Number(pkg.loadingMinutes) || 50);
-  const previewDuration = Math.min(Math.max(loadingMinutes * 1000, 6000), FINAL_PREVIEW_CAP_MS);
+  const loadingMinutes = getFinalLoadingMinutes(pkg);
+  const finalDuration = loadingMinutes * 60 * 1000;
 
   elements.finalTimeLabel.textContent = `${loadingMinutes} minutes`;
   setInstallState("Final");
@@ -621,7 +631,8 @@ function startFinalLoading() {
     percentElement: elements.finalProgressPercent,
     statusElement: elements.finalProgressStatus,
     messages: ["Starting final installation...", "Activating access...", "Verifying certificate...", "Finishing package..."],
-    duration: previewDuration,
+    duration: finalDuration,
+    tickMs: 1000,
     onDone: () => {
       setInstallState("Success");
       setStage("success");
@@ -649,6 +660,25 @@ function copyText(text) {
   document.execCommand("copy");
   document.body.removeChild(textarea);
   return Promise.resolve();
+}
+
+function readImageFile(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      resolve("");
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      reject(new Error("Please upload an image file."));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.addEventListener("load", () => resolve(String(reader.result || "")));
+    reader.addEventListener("error", () => reject(new Error("Image upload failed.")));
+    reader.readAsDataURL(file);
+  });
 }
 
 function renderFeaturePicker(selectedIds = []) {
@@ -679,8 +709,13 @@ function renderFeatureList() {
     .map(
       (feature) => `
         <article class="list-item">
-          <h4>${escapeHtml(feature.name)}</h4>
-          <p>${escapeHtml(feature.description || "No description.")}</p>
+          <div class="list-item-heading">
+            ${renderFeatureIconMarkup(feature)}
+            <div>
+              <h4>${escapeHtml(feature.name)}</h4>
+              <p>${escapeHtml(feature.description || "No description.")}</p>
+            </div>
+          </div>
           <div class="access-meta">
             <span>Icon: ${escapeHtml(getFeatureIcon(feature))}</span>
             <span>${feature.status}</span>
@@ -699,14 +734,16 @@ function renderFeatureList() {
 }
 
 function renderPackageList() {
-  elements.packageCount.textContent = `${appData.packages.length} Packages`;
+  const activePackages = appData.packages.filter((pkg) => pkg.status === "Active" && !isExpired(pkg));
+  elements.packageCount.textContent = `${activePackages.length}/${appData.packages.length} Active`;
 
   if (!appData.packages.length) {
     elements.packageList.innerHTML = `<div class="list-item"><h4>No packages</h4><p>Create a package to allow user login.</p></div>`;
     return;
   }
 
-  elements.packageList.innerHTML = appData.packages
+  elements.packageList.innerHTML = [...appData.packages]
+    .sort((a, b) => Number(b.status === "Active" && !isExpired(b)) - Number(a.status === "Active" && !isExpired(a)))
     .map((pkg) => {
       const status = isExpired(pkg) ? "Expired" : pkg.status;
       const featureTotal = pkg.featureIds.length;
@@ -744,9 +781,9 @@ function resetPackageForm() {
   elements.pkgValidity.value = "1";
   elements.pkgStatusInput.value = "Active";
   elements.pkgActivationMode.value = "random";
-  elements.pkgLoadingPreset.value = "50";
+  elements.pkgLoadingPreset.value = "60";
   elements.pkgCustomDays.value = "1";
-  elements.pkgCustomLoading.value = "50";
+  elements.pkgCustomLoading.value = "60";
   elements.pkgDeviceName.value = "Registered Device";
   elements.pkgLegalInfo.value = "Legal and regulatory access details are assigned by the admin.";
   elements.pkgPackageDetails.value = "Package details are assigned by the admin.";
@@ -775,8 +812,10 @@ function fillPackageForm(pkg) {
   elements.pkgContact.value = pkg.contactInfo || "";
   elements.pkgLegalInfo.value = pkg.legalInfo || "";
   elements.pkgPackageDetails.value = pkg.packageDetails || "";
-  elements.pkgLoadingPreset.value = pkg.loadingPreset || "custom";
-  elements.pkgCustomLoading.value = pkg.loadingMinutes || 50;
+  const loadingMinutes = getFinalLoadingMinutes(pkg);
+  const savedLoadingPreset = String(pkg.loadingPreset || loadingMinutes);
+  elements.pkgLoadingPreset.value = ["60", "70", "80"].includes(savedLoadingPreset) ? savedLoadingPreset : "custom";
+  elements.pkgCustomLoading.value = loadingMinutes;
   elements.pkgFinalMessage.value = pkg.finalMessage || "Installation Complete";
   renderFeaturePicker(pkg.featureIds || []);
   updateConditionalFields();
@@ -827,7 +866,10 @@ function savePackageFromForm(event) {
   const customDays = Number(elements.pkgCustomDays.value) || 1;
   const validityDays = validityType === "custom" ? customDays : Number(validityType);
   const loadingPreset = elements.pkgLoadingPreset.value;
-  const loadingMinutes = loadingPreset === "custom" ? Number(elements.pkgCustomLoading.value) || 50 : Number(loadingPreset);
+  const loadingMinutes = getFinalLoadingMinutes({
+    loadingPreset,
+    loadingMinutes: loadingPreset === "custom" ? elements.pkgCustomLoading.value : loadingPreset
+  });
   const featureIds = $$('input[name="featurePick"]:checked').map((input) => input.value);
   const now = Date.now();
 
@@ -870,6 +912,7 @@ function savePackageFromForm(event) {
 function resetFeatureForm() {
   elements.featureForm.reset();
   elements.featureId.value = "";
+  elements.featurePhoto.value = "";
   elements.featureFormTitle.textContent = "Add Feature";
   elements.saveFeatureButton.textContent = "Save Feature";
   elements.featureStatus.value = "Active";
@@ -882,19 +925,30 @@ function fillFeatureForm(feature) {
   elements.saveFeatureButton.textContent = "Update Feature";
   elements.featureName.value = feature.name;
   elements.featureIcon.value = feature.icon || getFeatureIcon(feature);
+  elements.featurePhoto.value = "";
   elements.featureDescription.value = feature.description || "";
   elements.featureStatus.value = feature.status;
   setMessage(elements.featureFormMessage, "");
 }
 
-function saveFeatureFromForm(event) {
+async function saveFeatureFromForm(event) {
   event.preventDefault();
   const id = elements.featureId.value || makeId("feat");
   const existing = appData.features.find((feature) => feature.id === id);
+  let image = existing?.image || "";
+
+  try {
+    image = (await readImageFile(elements.featurePhoto.files?.[0])) || image;
+  } catch (error) {
+    setMessage(elements.featureFormMessage, error.message);
+    return;
+  }
+
   const featureData = {
     id,
     name: elements.featureName.value.trim(),
     icon: elements.featureIcon.value.trim() || elements.featureName.value.trim().slice(0, 2).toUpperCase(),
+    image,
     description: elements.featureDescription.value.trim(),
     status: elements.featureStatus.value
   };
@@ -956,30 +1010,67 @@ function getFeatureIcon(feature) {
   return (feature.icon || feature.name.slice(0, 2)).slice(0, 4).toUpperCase();
 }
 
+function renderFeatureIconMarkup(feature) {
+  if (feature.image) {
+    return `<span class="feature-icon has-image"><img src="${escapeHtml(feature.image)}" alt=""></span>`;
+  }
+
+  return `<span class="feature-icon">${escapeHtml(getFeatureIcon(feature))}</span>`;
+}
+
+function getFinalLoadingMinutes(pkg) {
+  const minutes = Number(pkg?.loadingMinutes) || Number(pkg?.loadingPreset) || MIN_FINAL_LOADING_MINUTES;
+  return Math.min(MAX_FINAL_LOADING_MINUTES, Math.max(MIN_FINAL_LOADING_MINUTES, Math.round(minutes)));
+}
+
 function isLinkContact(value) {
   return /^(https?:\/\/|mailto:|tel:)/i.test(value);
 }
 
+function getContactTarget(value) {
+  const contact = (value || "").trim();
+  if (!contact) return "";
+  if (isLinkContact(contact)) return contact;
+  if (/^www\./i.test(contact)) return `https://${contact}`;
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) return `mailto:${contact}`;
+
+  const phoneCandidate = contact.replace(/whats\s*app:?/i, "").replace(/[^\d+]/g, "");
+  const digits = phoneCandidate.replace(/^\+/, "");
+  if ((/whats\s*app/i.test(contact) || /^\+?\d[\d\s().-]{7,}$/.test(contact)) && digits.length >= 8) {
+    return `https://wa.me/${digits}`;
+  }
+
+  return "";
+}
+
+function openOrCopyContact({ contact, label, mode = "auto", messageElement }) {
+  const value = (contact || "").trim();
+
+  if (!value) {
+    setMessage(messageElement, "Admin contact not set.");
+    return;
+  }
+
+  const target = getContactTarget(value);
+  const shouldOpen = mode === "open" || (mode === "auto" && target);
+  if (target && shouldOpen) {
+    window.open(target, "_blank", "noopener");
+    setMessage(messageElement, `${label || "Contact"} opened.`, "ok");
+    return;
+  }
+
+  copyText(value).then(() => {
+    setMessage(messageElement, `${label || "Contact"} copied.`, "ok");
+  });
+}
+
 function openSelectedAdminContact() {
   const settings = appData.settings || {};
-  const contact = (settings.contactValue || "").trim();
-  const mode = settings.contactMode || "auto";
-
-  if (!contact) {
-    setMessage(elements.loginMessage, "Admin contact not set.");
-    return;
-  }
-
-  const shouldOpen = mode === "open" || (mode === "auto" && isLinkContact(contact));
-  if (shouldOpen) {
-    const target = isLinkContact(contact) ? contact : `https://${contact}`;
-    window.open(target, "_blank", "noopener");
-    setMessage(elements.loginMessage, `${settings.contactLabel || "Admin contact"} opened.`, "ok");
-    return;
-  }
-
-  copyText(contact).then(() => {
-    setMessage(elements.loginMessage, `${settings.contactLabel || "Admin contact"} copied.`, "ok");
+  openOrCopyContact({
+    contact: settings.contactValue,
+    label: settings.contactLabel || "Admin contact",
+    mode: settings.contactMode || "auto",
+    messageElement: elements.loginMessage
   });
 }
 
@@ -1052,17 +1143,18 @@ elements.startInstallButton.addEventListener("click", startInstall);
 
 elements.contactButton.addEventListener("click", () => {
   const pkg = getActivePackage();
-  if (!pkg?.contactInfo) {
+  const contact = pkg?.contactInfo || appData.settings?.contactValue || "";
+  if (!contact) {
     setMessage(elements.contactMessage, "No contact info set.", "neutral");
     return;
   }
 
-  if (pkg.contactInfo.startsWith("http")) {
-    window.open(pkg.contactInfo, "_blank", "noopener");
-    setMessage(elements.contactMessage, "Contact opened.", "ok");
-  } else {
-    copyText(pkg.contactInfo).then(() => setMessage(elements.contactMessage, "Contact info copied.", "ok"));
-  }
+  openOrCopyContact({
+    contact,
+    label: pkg?.contactInfo ? "Package contact" : appData.settings?.contactLabel || "Admin contact",
+    mode: "auto",
+    messageElement: elements.contactMessage
+  });
 });
 
 elements.copyActivationButton.addEventListener("click", () => {
@@ -1084,9 +1176,10 @@ elements.dashboardFeatures.addEventListener("click", (event) => {
   const featureId = button.dataset.featureToggle;
   const featureStateMap = getFeatureStateMap(pkg);
   featureStateMap[featureId] = !featureStateMap[featureId];
+  const isActive = featureStateMap[featureId];
   saveData();
   renderFeatureModules(pkg);
-  setMessage(elements.contactMessage, "");
+  setMessage(elements.contactMessage, isActive ? "This command is active." : "This command is deactivated.", isActive ? "ok" : "neutral");
 });
 
 elements.serialForm.addEventListener("submit", (event) => {
