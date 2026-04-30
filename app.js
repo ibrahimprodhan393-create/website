@@ -1,0 +1,1221 @@
+const STORAGE_KEY = "activationAccessData.v1";
+const DAY_MS = 24 * 60 * 60 * 1000;
+const FINAL_PREVIEW_CAP_MS = 15000;
+const SERIAL_INSTALL_DURATION_MS = 2 * 60 * 1000;
+
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+let appData = loadData();
+let activePackageId = null;
+let activeTimer = null;
+let adminAuthenticated = false;
+
+const elements = {
+  userView: $("#userView"),
+  adminView: $("#adminView"),
+  loginView: $("#loginView"),
+  dashboardView: $("#dashboardView"),
+  loginForm: $("#loginForm"),
+  loginPassword: $("#loginPassword"),
+  togglePasswordButton: $("#togglePasswordButton"),
+  contactAdminLoginButton: $("#contactAdminLoginButton"),
+  loginMessage: $("#loginMessage"),
+  logoutButton: $("#logoutButton"),
+  dashboardTitle: $("#dashboardTitle"),
+  dashboardSubtitle: $("#dashboardSubtitle"),
+  packageName: $("#packageName"),
+  packageExpiry: $("#packageExpiry"),
+  packageStatus: $("#packageStatus"),
+  dashboardDeviceName: $("#dashboardDeviceName"),
+  deviceDetails: $("#deviceDetails"),
+  dashboardLegalInfo: $("#dashboardLegalInfo"),
+  dashboardPackageDetails: $("#dashboardPackageDetails"),
+  featureCount: $("#featureCount"),
+  dashboardFeatures: $("#dashboardFeatures"),
+  installState: $("#installState"),
+  startInstallButton: $("#startInstallButton"),
+  contactButton: $("#contactButton"),
+  contactMessage: $("#contactMessage"),
+  activationStage: $("#activationStage"),
+  installStart: $("#installStart"),
+  activationCodeOutput: $("#activationCodeOutput"),
+  copyActivationButton: $("#copyActivationButton"),
+  serialForm: $("#serialForm"),
+  serialInput: $("#serialInput"),
+  serialMessage: $("#serialMessage"),
+  progressStage: $("#progressStage"),
+  progressTitle: $("#progressTitle"),
+  progressStatus: $("#progressStatus"),
+  mainProgressBar: $("#mainProgressBar"),
+  mainProgressPercent: $("#mainProgressPercent"),
+  webCodeStage: $("#webCodeStage"),
+  webCodeForm: $("#webCodeForm"),
+  webCodeInput: $("#webCodeInput"),
+  webCodeMessage: $("#webCodeMessage"),
+  certificateStage: $("#certificateStage"),
+  certificateForm: $("#certificateForm"),
+  certificateInput: $("#certificateInput"),
+  certificateMessage: $("#certificateMessage"),
+  finalStage: $("#finalStage"),
+  finalTimeLabel: $("#finalTimeLabel"),
+  finalProgressStatus: $("#finalProgressStatus"),
+  finalProgressBar: $("#finalProgressBar"),
+  finalProgressPercent: $("#finalProgressPercent"),
+  successStage: $("#successStage"),
+  successMessage: $("#successMessage"),
+  restartFlowButton: $("#restartFlowButton"),
+  adminSettingsForm: $("#adminSettingsForm"),
+  adminPasswordInput: $("#adminPasswordInput"),
+  adminContactLabel: $("#adminContactLabel"),
+  adminContactValue: $("#adminContactValue"),
+  adminContactMode: $("#adminContactMode"),
+  adminSettingsMessage: $("#adminSettingsMessage"),
+  adminLogoutButton: $("#adminLogoutButton"),
+  resetDemoButton: $("#resetDemoButton"),
+  packageForm: $("#packageForm"),
+  packageFormTitle: $("#packageFormTitle"),
+  packageId: $("#packageId"),
+  pkgName: $("#pkgName"),
+  pkgPassword: $("#pkgPassword"),
+  pkgValidity: $("#pkgValidity"),
+  customValidityWrap: $("#customValidityWrap"),
+  pkgCustomDays: $("#pkgCustomDays"),
+  pkgStatusInput: $("#pkgStatusInput"),
+  pkgSerial: $("#pkgSerial"),
+  pkgDeviceName: $("#pkgDeviceName"),
+  pkgActivationMode: $("#pkgActivationMode"),
+  pkgActivationCode: $("#pkgActivationCode"),
+  pkgWebCode: $("#pkgWebCode"),
+  pkgCertificate: $("#pkgCertificate"),
+  pkgContact: $("#pkgContact"),
+  pkgLegalInfo: $("#pkgLegalInfo"),
+  pkgPackageDetails: $("#pkgPackageDetails"),
+  pkgLoadingPreset: $("#pkgLoadingPreset"),
+  customLoadingWrap: $("#customLoadingWrap"),
+  pkgCustomLoading: $("#pkgCustomLoading"),
+  pkgFinalMessage: $("#pkgFinalMessage"),
+  featurePicker: $("#featurePicker"),
+  savePackageButton: $("#savePackageButton"),
+  packageFormMessage: $("#packageFormMessage"),
+  clearPackageFormButton: $("#clearPackageFormButton"),
+  featureForm: $("#featureForm"),
+  featureFormTitle: $("#featureFormTitle"),
+  featureId: $("#featureId"),
+  featureName: $("#featureName"),
+  featureIcon: $("#featureIcon"),
+  featureDescription: $("#featureDescription"),
+  featureStatus: $("#featureStatus"),
+  saveFeatureButton: $("#saveFeatureButton"),
+  featureFormMessage: $("#featureFormMessage"),
+  clearFeatureFormButton: $("#clearFeatureFormButton"),
+  featureList: $("#featureList"),
+  packageList: $("#packageList"),
+  packageCount: $("#packageCount")
+};
+
+function seedData() {
+  const now = Date.now();
+  const features = [
+    {
+      id: "feat_aimbot",
+      name: "AimBot",
+      icon: "AB",
+      description: "Precision assist enabled for selected packages.",
+      status: "Active"
+    },
+    {
+      id: "feat_aimkey",
+      name: "AimKey",
+      icon: "AK",
+      description: "Custom aim key support for the active device.",
+      status: "Active"
+    },
+    {
+      id: "feat_config",
+      name: "Config",
+      icon: "CF",
+      description: "Package configuration profile is available.",
+      status: "Active"
+    },
+    {
+      id: "feat_device",
+      name: "Device Support",
+      icon: "DS",
+      description: "Bound serial support and device verification.",
+      status: "Active"
+    },
+    {
+      id: "feat_premium",
+      name: "Premium Access",
+      icon: "PR",
+      description: "Premium package tools and access layer.",
+      status: "Active"
+    },
+    {
+      id: "feat_secure",
+      name: "Secure Launcher",
+      icon: "SL",
+      description: "Protected launcher flow with certificate check.",
+      status: "Active"
+    }
+  ];
+
+  return {
+    settings: {
+      adminPassword: "ADMIN-2026",
+      contactLabel: "WhatsApp Admin",
+      contactValue: "WhatsApp: +8801000000000",
+      contactMode: "copy"
+    },
+    userFeatureStates: {},
+    features,
+    packages: [
+      {
+        id: "pkg_1day",
+        name: "1 Day Starter",
+        password: "KEY-1DAY-2026",
+        validityType: "1",
+        customDays: 1,
+        createdAt: now,
+        expiresAt: now + DAY_MS,
+        status: "Active",
+        deviceSerial: "JG7KD916DT",
+        deviceName: "iPhone 16 Pro Max",
+        activationMode: "random",
+        activationCode: "WEB-ACT-8K29-XP41",
+        webAccessCode: "WEB-1DAY-4477",
+        certificateCode: "CERT-1111",
+        contactInfo: "WhatsApp: +8801000000000",
+        legalInfo: "Regulatory model and access terms verified for this device.",
+        packageDetails: "Starter access package with selected essential modules.",
+        loadingPreset: "50",
+        loadingMinutes: 50,
+        finalMessage: "Access Activated Successfully",
+        featureIds: ["feat_aimbot", "feat_aimkey"]
+      },
+      {
+        id: "pkg_7day",
+        name: "7 Days Premium",
+        password: "KEY-7DAY-2026",
+        validityType: "7",
+        customDays: 7,
+        createdAt: now,
+        expiresAt: now + 7 * DAY_MS,
+        status: "Active",
+        deviceSerial: "F2LXR9A0Q05N",
+        deviceName: "iPhone 16 Pro Max",
+        activationMode: "random",
+        activationCode: "WEB-ACT-5QZ7-LM90",
+        webAccessCode: "WEB-7DAY-8899",
+        certificateCode: "CERT-2222",
+        contactInfo: "support@example.com",
+        legalInfo: "Private access certificate is active. Use is limited to the assigned serial number.",
+        packageDetails: "Premium weekly package with device support and configuration access.",
+        loadingPreset: "60",
+        loadingMinutes: 60,
+        finalMessage: "Package Installed Successfully",
+        featureIds: ["feat_aimbot", "feat_aimkey", "feat_config", "feat_device"]
+      },
+      {
+        id: "pkg_30day",
+        name: "30 Days Ultimate",
+        password: "KEY-30DAY-2026",
+        validityType: "30",
+        customDays: 30,
+        createdAt: now,
+        expiresAt: now + 30 * DAY_MS,
+        status: "Active",
+        deviceSerial: "Q9MXR4B8V21K",
+        deviceName: "Android Secure Device",
+        activationMode: "fixed",
+        activationCode: "WEB-ACT-72PA-RT33",
+        webAccessCode: "WEB-30DAY-5522",
+        certificateCode: "CERT-3333",
+        contactInfo: "https://example.com/support",
+        legalInfo: "Full package authorization is active for the registered device profile.",
+        packageDetails: "Ultimate package with all modules and extended access duration.",
+        loadingPreset: "90",
+        loadingMinutes: 90,
+        finalMessage: "Installation Complete",
+        featureIds: features.map((feature) => feature.id)
+      }
+    ]
+  };
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? normalizeData(JSON.parse(raw)) : seedData();
+  } catch (error) {
+    return seedData();
+  }
+}
+
+function normalizeData(data) {
+  const defaults = seedData();
+  return {
+    settings: {
+      ...defaults.settings,
+      ...(data.settings || {})
+    },
+    features: (data.features || defaults.features).map((feature) => ({
+      ...feature,
+      icon: feature.icon || feature.name.slice(0, 2).toUpperCase()
+    })),
+    userFeatureStates: data.userFeatureStates || {},
+    packages: (data.packages || defaults.packages).map((pkg) => ({
+      ...pkg,
+      deviceName: pkg.deviceName || "Registered Device",
+      legalInfo: pkg.legalInfo || "Legal and regulatory access details are assigned by the admin.",
+      packageDetails: pkg.packageDetails || "Package details are assigned by the admin."
+    }))
+  };
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+}
+
+function makeId(prefix) {
+  return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function generateActivationCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const makePart = () =>
+    Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  return `WEB-ACT-${makePart()}-${makePart()}`;
+}
+
+function getActivePackage() {
+  return appData.packages.find((pkg) => pkg.id === activePackageId) || null;
+}
+
+function getValidityDays(pkg) {
+  if (pkg.validityType === "custom") {
+    return Math.max(1, Number(pkg.customDays) || 1);
+  }
+  return Math.max(1, Number(pkg.validityType) || 1);
+}
+
+function isExpired(pkg) {
+  return Date.now() > Number(pkg.expiresAt);
+}
+
+function formatDate(timestamp) {
+  return new Intl.DateTimeFormat("en", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(new Date(timestamp));
+}
+
+function maskSerial(serial) {
+  if (!serial) return "Not set";
+  if (serial.length <= 5) return "Locked";
+  return `${serial.slice(0, 4)}${"*".repeat(Math.max(serial.length - 6, 2))}${serial.slice(-2)}`;
+}
+
+function setMessage(element, text, type = "error") {
+  element.textContent = text || "";
+  element.classList.toggle("ok", type === "ok");
+  element.classList.toggle("neutral", type === "neutral");
+}
+
+function setView(view) {
+  if (view === "admin" && !adminAuthenticated) {
+    showLoginGate("Enter admin password to open Admin Panel.");
+    return;
+  }
+
+  $$(".switch-button").forEach((button) => {
+    const active = button.dataset.view === view;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+  elements.userView.classList.toggle("active", view === "user");
+  elements.adminView.classList.toggle("active", view === "admin");
+  updatePageMode();
+}
+
+function updatePageMode() {
+  const loginActive = elements.userView.classList.contains("active") && !elements.loginView.classList.contains("hidden");
+  const dashboardActive = elements.userView.classList.contains("active") && !elements.dashboardView.classList.contains("hidden");
+  document.documentElement.classList.toggle("login-active", loginActive);
+  document.documentElement.classList.toggle("dashboard-active", dashboardActive);
+  document.body.classList.toggle("login-active", loginActive);
+  document.body.classList.toggle("dashboard-active", dashboardActive);
+}
+
+function showLoginGate(message = "") {
+  clearActiveTimer();
+  activePackageId = null;
+  elements.dashboardView.classList.add("hidden");
+  elements.loginView.classList.remove("hidden");
+  elements.userView.classList.add("active");
+  elements.adminView.classList.remove("active");
+  $$(".switch-button").forEach((button) => {
+    const active = button.dataset.view === "user";
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+  setMessage(elements.loginMessage, message, message ? "neutral" : "error");
+  updatePageMode();
+  elements.loginPassword.focus();
+}
+
+function updateStatusPill(element, status) {
+  element.classList.remove("warn", "danger", "muted");
+  element.textContent = status;
+  if (status === "Expired") element.classList.add("warn");
+  if (status === "Disabled") element.classList.add("danger");
+}
+
+function getVisibleFeatures(pkg) {
+  return appData.features.filter(
+    (feature) => pkg.featureIds.includes(feature.id) && feature.status === "Active"
+  );
+}
+
+function getFeatureStateMap(pkg, visibleFeatures = getVisibleFeatures(pkg)) {
+  appData.userFeatureStates ||= {};
+  appData.userFeatureStates[pkg.id] ||= {};
+  visibleFeatures.forEach((feature) => {
+    if (typeof appData.userFeatureStates[pkg.id][feature.id] !== "boolean") {
+      appData.userFeatureStates[pkg.id][feature.id] = true;
+    }
+  });
+  return appData.userFeatureStates[pkg.id];
+}
+
+function getEnabledFeatures(pkg) {
+  const visibleFeatures = getVisibleFeatures(pkg);
+  const featureStateMap = getFeatureStateMap(pkg, visibleFeatures);
+  return visibleFeatures.filter((feature) => featureStateMap[feature.id]);
+}
+
+function renderFeatureModules(pkg) {
+  const visibleFeatures = getVisibleFeatures(pkg);
+  const featureStateMap = getFeatureStateMap(pkg, visibleFeatures);
+  const enabledTotal = visibleFeatures.filter((feature) => featureStateMap[feature.id]).length;
+
+  elements.featureCount.textContent = `${enabledTotal}/${visibleFeatures.length} Active`;
+
+  if (!visibleFeatures.length) {
+    elements.dashboardFeatures.innerHTML = `
+      <div class="feature-card console-feature-card">
+        <div>
+          <h4>No active features assigned</h4>
+          <p>This package is active but no enabled feature is selected.</p>
+        </div>
+      </div>`;
+    return;
+  }
+
+  elements.dashboardFeatures.innerHTML = visibleFeatures
+    .map((feature) => {
+      const enabled = featureStateMap[feature.id];
+      return `
+        <article class="feature-card console-feature-card ${enabled ? "is-enabled" : "is-disabled"}">
+          <span class="feature-icon">${escapeHtml(getFeatureIcon(feature))}</span>
+          <div>
+            <div class="feature-title-row">
+              <h4>${escapeHtml(feature.name)}</h4>
+              <span>${enabled ? "Active" : "Deactivated"}</span>
+            </div>
+            <p>${escapeHtml(feature.description || "Enabled for this package.")}</p>
+            <button type="button" data-feature-toggle="${feature.id}">
+              ${enabled ? "Deactivate" : "Activate"}
+            </button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderDashboard(pkg) {
+  const status = isExpired(pkg) ? "Expired" : pkg.status;
+
+  elements.loginView.classList.add("hidden");
+  elements.dashboardView.classList.remove("hidden");
+  elements.dashboardTitle.textContent = "Welcome to the Hyper Hook Web Portal";
+  elements.dashboardSubtitle.textContent = `${pkg.name} access is ready. Click the button below to install.`;
+  elements.packageName.textContent = pkg.name;
+  elements.packageExpiry.textContent = `${getValidityDays(pkg)} day(s), ${formatDate(pkg.expiresAt)}`;
+  elements.dashboardDeviceName.textContent = pkg.deviceName || "Registered Device";
+  elements.deviceDetails.textContent = pkg.deviceSerial;
+  elements.dashboardLegalInfo.textContent = pkg.legalInfo || "Legal and regulatory access details are assigned by the admin.";
+  elements.dashboardPackageDetails.textContent = pkg.packageDetails || "Package details are assigned by the admin.";
+  updateStatusPill(elements.packageStatus, status);
+  renderFeatureModules(pkg);
+  saveData();
+
+  resetInstallFlow();
+  updatePageMode();
+}
+
+function resetInstallFlow() {
+  clearActiveTimer();
+  setInstallState("Waiting");
+  setStage("start");
+  elements.activationCodeOutput.value = "";
+  elements.serialInput.value = "";
+  elements.webCodeInput.value = "";
+  elements.certificateInput.value = "";
+  setMessage(elements.serialMessage, "");
+  setMessage(elements.webCodeMessage, "");
+  setMessage(elements.certificateMessage, "");
+  setMessage(elements.contactMessage, "");
+  setProgress(elements.mainProgressBar, elements.mainProgressPercent, 0);
+  setProgress(elements.finalProgressBar, elements.finalProgressPercent, 0);
+  updateStepDots("activation");
+}
+
+function setInstallState(text) {
+  elements.installState.textContent = text;
+}
+
+function setStage(stage) {
+  const stages = {
+    start: elements.installStart,
+    activation: elements.activationStage,
+    progress: elements.progressStage,
+    web: elements.webCodeStage,
+    cert: elements.certificateStage,
+    final: elements.finalStage,
+    success: elements.successStage
+  };
+
+  Object.values(stages).forEach((element) => element.classList.add("hidden"));
+  stages[stage].classList.remove("hidden");
+}
+
+function updateStepDots(activeStep) {
+  const order = ["activation", "serial", "files", "web", "cert", "final"];
+  const activeIndex = order.indexOf(activeStep);
+
+  $$("[data-step-dot]").forEach((dot) => {
+    const dotIndex = order.indexOf(dot.dataset.stepDot);
+    dot.classList.toggle("active", dot.dataset.stepDot === activeStep);
+    dot.classList.toggle("complete", dotIndex >= 0 && dotIndex < activeIndex);
+  });
+}
+
+function setProgress(bar, percentElement, value) {
+  const safeValue = Math.max(0, Math.min(100, Math.round(value)));
+  bar.style.width = `${safeValue}%`;
+  percentElement.textContent = `${safeValue}%`;
+}
+
+function runProgress({ bar, percentElement, statusElement, titleElement, title, messages, duration, onDone }) {
+  clearActiveTimer();
+  if (titleElement && title) titleElement.textContent = title;
+  const started = Date.now();
+
+  activeTimer = window.setInterval(() => {
+    const elapsed = Date.now() - started;
+    const progress = Math.min(100, (elapsed / duration) * 100);
+    const messageIndex = Math.min(messages.length - 1, Math.floor((progress / 100) * messages.length));
+
+    const roundedProgress = Math.round(progress);
+    statusElement.textContent =
+      statusElement.id === "progressStatus" ? `Installing Files: ${roundedProgress}%` : messages[messageIndex];
+    setProgress(bar, percentElement, progress);
+
+    if (progress >= 100) {
+      clearActiveTimer();
+      onDone();
+    }
+  }, 80);
+}
+
+function clearActiveTimer() {
+  if (activeTimer) {
+    window.clearInterval(activeTimer);
+    activeTimer = null;
+  }
+}
+
+function startInstall() {
+  const pkg = getActivePackage();
+  if (!pkg) return;
+
+  if (pkg.status !== "Active" || isExpired(pkg)) {
+    setMessage(elements.contactMessage, isExpired(pkg) ? "Access expired" : "Access disabled");
+    return;
+  }
+
+  const code = generateActivationCode();
+  elements.activationCodeOutput.value = code;
+  setInstallState("Activation");
+  setStage("activation");
+  updateStepDots("serial");
+}
+
+function startDeviceLoading() {
+  setInstallState("Installing");
+  setStage("progress");
+  updateStepDots("files");
+  setProgress(elements.mainProgressBar, elements.mainProgressPercent, 0);
+  runProgress({
+    bar: elements.mainProgressBar,
+    percentElement: elements.mainProgressPercent,
+    statusElement: elements.progressStatus,
+    titleElement: elements.progressTitle,
+    title: "Installing Files...",
+    messages: [
+      "Device serial verified...",
+      "Installing firmware...",
+      "Installing files...",
+      "Verifying package...",
+      "Preparing web access activation..."
+    ],
+    duration: SERIAL_INSTALL_DURATION_MS,
+    onDone: () => {
+      setInstallState("Activation Code");
+      setStage("web");
+      updateStepDots("cert");
+    }
+  });
+}
+
+function startFileLoading() {
+  setInstallState("Installing");
+  updateStepDots("web");
+  setProgress(elements.mainProgressBar, elements.mainProgressPercent, 0);
+  runProgress({
+    bar: elements.mainProgressBar,
+    percentElement: elements.mainProgressPercent,
+    statusElement: elements.progressStatus,
+    titleElement: elements.progressTitle,
+    title: "File Installation Step",
+    messages: ["Installing files...", "Verifying package...", "Preparing access..."],
+    duration: 4500,
+    onDone: () => {
+      setInstallState("Activation Code");
+      setStage("web");
+      updateStepDots("cert");
+    }
+  });
+}
+
+function startFinalLoading() {
+  const pkg = getActivePackage();
+  const loadingMinutes = Math.max(1, Number(pkg.loadingMinutes) || 50);
+  const previewDuration = Math.min(Math.max(loadingMinutes * 1000, 6000), FINAL_PREVIEW_CAP_MS);
+
+  elements.finalTimeLabel.textContent = `${loadingMinutes} minutes`;
+  setInstallState("Final");
+  setStage("final");
+  updateStepDots("final");
+  setProgress(elements.finalProgressBar, elements.finalProgressPercent, 0);
+
+  runProgress({
+    bar: elements.finalProgressBar,
+    percentElement: elements.finalProgressPercent,
+    statusElement: elements.finalProgressStatus,
+    messages: ["Starting final installation...", "Activating access...", "Verifying certificate...", "Finishing package..."],
+    duration: previewDuration,
+    onDone: () => {
+      setInstallState("Success");
+      setStage("success");
+      elements.successMessage.textContent = pkg.finalMessage || "Installation Complete";
+      $$("[data-step-dot]").forEach((dot) => {
+        dot.classList.remove("active");
+        dot.classList.add("complete");
+      });
+    }
+  });
+}
+
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  document.body.removeChild(textarea);
+  return Promise.resolve();
+}
+
+function renderFeaturePicker(selectedIds = []) {
+  if (!appData.features.length) {
+    elements.featurePicker.innerHTML = `<p class="form-message neutral">No features available.</p>`;
+    return;
+  }
+
+  elements.featurePicker.innerHTML = appData.features
+    .map(
+      (feature) => `
+        <label class="checkbox-line">
+          <input type="checkbox" name="featurePick" value="${feature.id}" ${selectedIds.includes(feature.id) ? "checked" : ""}>
+          <span>${escapeHtml(feature.name)}${feature.status === "Disabled" ? " (Disabled)" : ""}</span>
+        </label>
+      `
+    )
+    .join("");
+}
+
+function renderFeatureList() {
+  if (!appData.features.length) {
+    elements.featureList.innerHTML = `<div class="list-item"><h4>No features</h4><p>Add a feature to assign it to packages.</p></div>`;
+    return;
+  }
+
+  elements.featureList.innerHTML = appData.features
+    .map(
+      (feature) => `
+        <article class="list-item">
+          <h4>${escapeHtml(feature.name)}</h4>
+          <p>${escapeHtml(feature.description || "No description.")}</p>
+          <div class="access-meta">
+            <span>Icon: ${escapeHtml(getFeatureIcon(feature))}</span>
+            <span>${feature.status}</span>
+          </div>
+          <div class="list-actions">
+            <button type="button" data-feature-action="edit" data-feature-id="${feature.id}">Edit</button>
+            <button type="button" data-feature-action="toggle" data-feature-id="${feature.id}">
+              ${feature.status === "Active" ? "Disable" : "Enable"}
+            </button>
+            <button type="button" class="danger-action" data-feature-action="delete" data-feature-id="${feature.id}">Delete</button>
+          </div>
+        </article>
+      `
+    )
+    .join("");
+}
+
+function renderPackageList() {
+  elements.packageCount.textContent = `${appData.packages.length} Packages`;
+
+  if (!appData.packages.length) {
+    elements.packageList.innerHTML = `<div class="list-item"><h4>No packages</h4><p>Create a package to allow user login.</p></div>`;
+    return;
+  }
+
+  elements.packageList.innerHTML = appData.packages
+    .map((pkg) => {
+      const status = isExpired(pkg) ? "Expired" : pkg.status;
+      const featureTotal = pkg.featureIds.length;
+      return `
+        <article class="access-row">
+          <div>
+            <h4>${escapeHtml(pkg.name)}</h4>
+            <p>Password: ${escapeHtml(pkg.password)} | Device: ${escapeHtml(pkg.deviceName || "Registered Device")} | Serial: ${escapeHtml(pkg.deviceSerial)}</p>
+            <div class="access-meta">
+              <span>${status}</span>
+              <span>${getValidityDays(pkg)} day(s)</span>
+              <span>${featureTotal} feature(s)</span>
+              <span>Web: ${escapeHtml(pkg.webAccessCode)}</span>
+              <span>Cert: ${escapeHtml(pkg.certificateCode)}</span>
+            </div>
+          </div>
+          <div class="list-actions">
+            <button type="button" data-package-action="edit" data-package-id="${pkg.id}">Edit</button>
+            <button type="button" data-package-action="toggle" data-package-id="${pkg.id}">
+              ${pkg.status === "Active" ? "Disable" : "Enable"}
+            </button>
+            <button type="button" class="danger-action" data-package-action="delete" data-package-id="${pkg.id}">Delete</button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function resetPackageForm() {
+  elements.packageForm.reset();
+  elements.packageId.value = "";
+  elements.packageFormTitle.textContent = "Create Package";
+  elements.savePackageButton.textContent = "Save Package";
+  elements.pkgValidity.value = "1";
+  elements.pkgStatusInput.value = "Active";
+  elements.pkgActivationMode.value = "random";
+  elements.pkgLoadingPreset.value = "50";
+  elements.pkgCustomDays.value = "1";
+  elements.pkgCustomLoading.value = "50";
+  elements.pkgDeviceName.value = "Registered Device";
+  elements.pkgLegalInfo.value = "Legal and regulatory access details are assigned by the admin.";
+  elements.pkgPackageDetails.value = "Package details are assigned by the admin.";
+  elements.pkgFinalMessage.value = "Access Activated Successfully";
+  elements.pkgActivationCode.value = generateActivationCode();
+  renderFeaturePicker([]);
+  updateConditionalFields();
+  setMessage(elements.packageFormMessage, "");
+}
+
+function fillPackageForm(pkg) {
+  elements.packageId.value = pkg.id;
+  elements.packageFormTitle.textContent = "Edit Package";
+  elements.savePackageButton.textContent = "Update Package";
+  elements.pkgName.value = pkg.name;
+  elements.pkgPassword.value = pkg.password;
+  elements.pkgValidity.value = pkg.validityType;
+  elements.pkgCustomDays.value = pkg.customDays || getValidityDays(pkg);
+  elements.pkgStatusInput.value = pkg.status;
+  elements.pkgSerial.value = pkg.deviceSerial;
+  elements.pkgDeviceName.value = pkg.deviceName || "Registered Device";
+  elements.pkgActivationMode.value = pkg.activationMode || "random";
+  elements.pkgActivationCode.value = pkg.activationCode || "";
+  elements.pkgWebCode.value = pkg.webAccessCode;
+  elements.pkgCertificate.value = pkg.certificateCode;
+  elements.pkgContact.value = pkg.contactInfo || "";
+  elements.pkgLegalInfo.value = pkg.legalInfo || "";
+  elements.pkgPackageDetails.value = pkg.packageDetails || "";
+  elements.pkgLoadingPreset.value = pkg.loadingPreset || "custom";
+  elements.pkgCustomLoading.value = pkg.loadingMinutes || 50;
+  elements.pkgFinalMessage.value = pkg.finalMessage || "Installation Complete";
+  renderFeaturePicker(pkg.featureIds || []);
+  updateConditionalFields();
+  setMessage(elements.packageFormMessage, "");
+  setView("admin");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function savePackageFromForm(event) {
+  event.preventDefault();
+
+  const id = elements.packageId.value || makeId("pkg");
+  const existing = appData.packages.find((pkg) => pkg.id === id);
+  const duplicatePassword = appData.packages.some(
+    (pkg) => pkg.id !== id && pkg.password === elements.pkgPassword.value.trim()
+  );
+  const duplicateSerial = appData.packages.some(
+    (pkg) => pkg.id !== id && pkg.deviceSerial === elements.pkgSerial.value.trim()
+  );
+  const duplicateWebCode = appData.packages.some(
+    (pkg) => pkg.id !== id && pkg.webAccessCode === elements.pkgWebCode.value.trim()
+  );
+  const duplicateCertificate = appData.packages.some(
+    (pkg) => pkg.id !== id && pkg.certificateCode === elements.pkgCertificate.value.trim()
+  );
+
+  if (duplicatePassword) {
+    setMessage(elements.packageFormMessage, "This password is already used by another package.");
+    return;
+  }
+
+  if (duplicateSerial) {
+    setMessage(elements.packageFormMessage, "This serial number is already assigned to another package.");
+    return;
+  }
+
+  if (duplicateWebCode) {
+    setMessage(elements.packageFormMessage, "This web access activation code is already assigned to another package.");
+    return;
+  }
+
+  if (duplicateCertificate) {
+    setMessage(elements.packageFormMessage, "This certificate code is already assigned to another package.");
+    return;
+  }
+
+  const validityType = elements.pkgValidity.value;
+  const customDays = Number(elements.pkgCustomDays.value) || 1;
+  const validityDays = validityType === "custom" ? customDays : Number(validityType);
+  const loadingPreset = elements.pkgLoadingPreset.value;
+  const loadingMinutes = loadingPreset === "custom" ? Number(elements.pkgCustomLoading.value) || 50 : Number(loadingPreset);
+  const featureIds = $$('input[name="featurePick"]:checked').map((input) => input.value);
+  const now = Date.now();
+
+  const packageData = {
+    id,
+    name: elements.pkgName.value.trim(),
+    password: elements.pkgPassword.value.trim(),
+    validityType,
+    customDays: validityDays,
+    createdAt: existing?.createdAt || now,
+    expiresAt: now + validityDays * DAY_MS,
+    status: elements.pkgStatusInput.value,
+    deviceSerial: elements.pkgSerial.value.trim(),
+    deviceName: elements.pkgDeviceName.value.trim() || "Registered Device",
+    activationMode: elements.pkgActivationMode.value,
+    activationCode: elements.pkgActivationCode.value.trim() || generateActivationCode(),
+    webAccessCode: elements.pkgWebCode.value.trim(),
+    certificateCode: elements.pkgCertificate.value.trim(),
+    contactInfo: elements.pkgContact.value.trim(),
+    legalInfo: elements.pkgLegalInfo.value.trim(),
+    packageDetails: elements.pkgPackageDetails.value.trim(),
+    loadingPreset,
+    loadingMinutes,
+    finalMessage: elements.pkgFinalMessage.value.trim(),
+    featureIds
+  };
+
+  if (existing) {
+    appData.packages = appData.packages.map((pkg) => (pkg.id === id ? packageData : pkg));
+  } else {
+    appData.packages.push(packageData);
+  }
+
+  saveData();
+  renderAdmin();
+  resetPackageForm();
+  setMessage(elements.packageFormMessage, existing ? "Package updated." : "Package created.", "ok");
+}
+
+function resetFeatureForm() {
+  elements.featureForm.reset();
+  elements.featureId.value = "";
+  elements.featureFormTitle.textContent = "Add Feature";
+  elements.saveFeatureButton.textContent = "Save Feature";
+  elements.featureStatus.value = "Active";
+  setMessage(elements.featureFormMessage, "");
+}
+
+function fillFeatureForm(feature) {
+  elements.featureId.value = feature.id;
+  elements.featureFormTitle.textContent = "Edit Feature";
+  elements.saveFeatureButton.textContent = "Update Feature";
+  elements.featureName.value = feature.name;
+  elements.featureIcon.value = feature.icon || getFeatureIcon(feature);
+  elements.featureDescription.value = feature.description || "";
+  elements.featureStatus.value = feature.status;
+  setMessage(elements.featureFormMessage, "");
+}
+
+function saveFeatureFromForm(event) {
+  event.preventDefault();
+  const id = elements.featureId.value || makeId("feat");
+  const existing = appData.features.find((feature) => feature.id === id);
+  const featureData = {
+    id,
+    name: elements.featureName.value.trim(),
+    icon: elements.featureIcon.value.trim() || elements.featureName.value.trim().slice(0, 2).toUpperCase(),
+    description: elements.featureDescription.value.trim(),
+    status: elements.featureStatus.value
+  };
+
+  if (existing) {
+    appData.features = appData.features.map((feature) => (feature.id === id ? featureData : feature));
+  } else {
+    appData.features.push(featureData);
+  }
+
+  saveData();
+  renderAdmin();
+  resetFeatureForm();
+  setMessage(elements.featureFormMessage, existing ? "Feature updated." : "Feature added.", "ok");
+}
+
+function renderAdmin() {
+  renderAdminSettings();
+  renderFeaturePicker($$('input[name="featurePick"]:checked').map((input) => input.value));
+  renderFeatureList();
+  renderPackageList();
+}
+
+function renderAdminSettings() {
+  const settings = appData.settings || {};
+  elements.adminPasswordInput.value = settings.adminPassword || "";
+  elements.adminContactLabel.value = settings.contactLabel || "";
+  elements.adminContactValue.value = settings.contactValue || "";
+  elements.adminContactMode.value = settings.contactMode || "auto";
+}
+
+function saveAdminSettings(event) {
+  event.preventDefault();
+  appData.settings = {
+    adminPassword: elements.adminPasswordInput.value.trim(),
+    contactLabel: elements.adminContactLabel.value.trim(),
+    contactValue: elements.adminContactValue.value.trim(),
+    contactMode: elements.adminContactMode.value
+  };
+  saveData();
+  setMessage(elements.adminSettingsMessage, "Admin settings saved.", "ok");
+}
+
+function updateConditionalFields() {
+  elements.customValidityWrap.classList.toggle("hidden", elements.pkgValidity.value !== "custom");
+  elements.customLoadingWrap.classList.toggle("hidden", elements.pkgLoadingPreset.value !== "custom");
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function getFeatureIcon(feature) {
+  return (feature.icon || feature.name.slice(0, 2)).slice(0, 4).toUpperCase();
+}
+
+function isLinkContact(value) {
+  return /^(https?:\/\/|mailto:|tel:)/i.test(value);
+}
+
+function openSelectedAdminContact() {
+  const settings = appData.settings || {};
+  const contact = (settings.contactValue || "").trim();
+  const mode = settings.contactMode || "auto";
+
+  if (!contact) {
+    setMessage(elements.loginMessage, "Admin contact not set.");
+    return;
+  }
+
+  const shouldOpen = mode === "open" || (mode === "auto" && isLinkContact(contact));
+  if (shouldOpen) {
+    const target = isLinkContact(contact) ? contact : `https://${contact}`;
+    window.open(target, "_blank", "noopener");
+    setMessage(elements.loginMessage, `${settings.contactLabel || "Admin contact"} opened.`, "ok");
+    return;
+  }
+
+  copyText(contact).then(() => {
+    setMessage(elements.loginMessage, `${settings.contactLabel || "Admin contact"} copied.`, "ok");
+  });
+}
+
+$$("[data-view]").forEach((button) => {
+  button.addEventListener("click", () => setView(button.dataset.view));
+});
+
+elements.togglePasswordButton.addEventListener("click", () => {
+  const showing = elements.loginPassword.type === "text";
+  elements.loginPassword.type = showing ? "password" : "text";
+  elements.togglePasswordButton.textContent = showing ? "SHOW" : "HIDE";
+  elements.togglePasswordButton.setAttribute("aria-label", showing ? "Show password" : "Hide password");
+});
+
+elements.contactAdminLoginButton.addEventListener("click", openSelectedAdminContact);
+
+elements.loginForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const password = elements.loginPassword.value.trim();
+
+  if (password === (appData.settings?.adminPassword || "")) {
+    adminAuthenticated = true;
+    activePackageId = null;
+    elements.loginPassword.value = "";
+    elements.loginView.classList.remove("hidden");
+    elements.dashboardView.classList.add("hidden");
+    setMessage(elements.loginMessage, "");
+    setView("admin");
+    return;
+  }
+
+  const pkg = appData.packages.find((item) => item.password === password);
+
+  if (!pkg) {
+    setMessage(elements.loginMessage, "Incorrect Password");
+    return;
+  }
+
+  if (pkg.status !== "Active") {
+    setMessage(elements.loginMessage, "Access disabled");
+    return;
+  }
+
+  if (isExpired(pkg)) {
+    setMessage(elements.loginMessage, "Access expired");
+    return;
+  }
+
+  activePackageId = pkg.id;
+  setMessage(elements.loginMessage, "");
+  renderDashboard(pkg);
+});
+
+elements.logoutButton.addEventListener("click", () => {
+  activePackageId = null;
+  clearActiveTimer();
+  elements.loginPassword.value = "";
+  elements.loginView.classList.remove("hidden");
+  elements.dashboardView.classList.add("hidden");
+  updatePageMode();
+});
+
+elements.adminLogoutButton.addEventListener("click", () => {
+  adminAuthenticated = false;
+  showLoginGate("Admin logged out.");
+});
+
+elements.startInstallButton.addEventListener("click", startInstall);
+
+elements.contactButton.addEventListener("click", () => {
+  const pkg = getActivePackage();
+  if (!pkg?.contactInfo) {
+    setMessage(elements.contactMessage, "No contact info set.", "neutral");
+    return;
+  }
+
+  if (pkg.contactInfo.startsWith("http")) {
+    window.open(pkg.contactInfo, "_blank", "noopener");
+    setMessage(elements.contactMessage, "Contact opened.", "ok");
+  } else {
+    copyText(pkg.contactInfo).then(() => setMessage(elements.contactMessage, "Contact info copied.", "ok"));
+  }
+});
+
+elements.copyActivationButton.addEventListener("click", () => {
+  copyText(elements.activationCodeOutput.value).then(() => {
+    elements.copyActivationButton.textContent = "Copied";
+    window.setTimeout(() => {
+      elements.copyActivationButton.textContent = "Copy Key";
+    }, 1200);
+  });
+});
+
+elements.dashboardFeatures.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-feature-toggle]");
+  if (!button) return;
+
+  const pkg = getActivePackage();
+  if (!pkg) return;
+
+  const featureId = button.dataset.featureToggle;
+  const featureStateMap = getFeatureStateMap(pkg);
+  featureStateMap[featureId] = !featureStateMap[featureId];
+  saveData();
+  renderFeatureModules(pkg);
+  setMessage(elements.contactMessage, "");
+});
+
+elements.serialForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const pkg = getActivePackage();
+  const serial = elements.serialInput.value.trim();
+
+  if (!pkg || serial !== pkg.deviceSerial) {
+    setMessage(elements.serialMessage, "Incorrect Device Serial Number");
+    return;
+  }
+
+  setMessage(elements.serialMessage, "");
+  startDeviceLoading();
+});
+
+elements.webCodeForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const pkg = getActivePackage();
+  const webCode = elements.webCodeInput.value.trim();
+
+  if (!pkg || webCode !== pkg.webAccessCode) {
+    setMessage(elements.webCodeMessage, "Invalid Web Access Activation Code");
+    return;
+  }
+
+  setMessage(elements.webCodeMessage, "");
+  setInstallState("Certificate");
+  setStage("cert");
+});
+
+elements.certificateForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const pkg = getActivePackage();
+  const certificate = elements.certificateInput.value.trim();
+
+  if (!pkg || certificate !== pkg.certificateCode) {
+    setMessage(elements.certificateMessage, "Incorrect Access Certificate Code");
+    return;
+  }
+
+  setMessage(elements.certificateMessage, "");
+  startFinalLoading();
+});
+
+elements.restartFlowButton.addEventListener("click", resetInstallFlow);
+elements.adminSettingsForm.addEventListener("submit", saveAdminSettings);
+elements.packageForm.addEventListener("submit", savePackageFromForm);
+elements.featureForm.addEventListener("submit", saveFeatureFromForm);
+elements.clearPackageFormButton.addEventListener("click", resetPackageForm);
+elements.clearFeatureFormButton.addEventListener("click", resetFeatureForm);
+elements.pkgValidity.addEventListener("change", updateConditionalFields);
+elements.pkgLoadingPreset.addEventListener("change", updateConditionalFields);
+
+elements.featureList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-feature-action]");
+  if (!button) return;
+
+  const feature = appData.features.find((item) => item.id === button.dataset.featureId);
+  if (!feature) return;
+
+  if (button.dataset.featureAction === "edit") {
+    fillFeatureForm(feature);
+  }
+
+  if (button.dataset.featureAction === "toggle") {
+    feature.status = feature.status === "Active" ? "Disabled" : "Active";
+    saveData();
+    renderAdmin();
+    if (activePackageId) renderDashboard(getActivePackage());
+  }
+
+  if (button.dataset.featureAction === "delete") {
+    if (!window.confirm("Delete this feature?")) return;
+    appData.features = appData.features.filter((item) => item.id !== feature.id);
+    appData.packages = appData.packages.map((pkg) => ({
+      ...pkg,
+      featureIds: pkg.featureIds.filter((id) => id !== feature.id)
+    }));
+    saveData();
+    renderAdmin();
+    if (activePackageId) renderDashboard(getActivePackage());
+  }
+});
+
+elements.packageList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-package-action]");
+  if (!button) return;
+
+  const pkg = appData.packages.find((item) => item.id === button.dataset.packageId);
+  if (!pkg) return;
+
+  if (button.dataset.packageAction === "edit") {
+    fillPackageForm(pkg);
+  }
+
+  if (button.dataset.packageAction === "toggle") {
+    pkg.status = pkg.status === "Active" ? "Disabled" : "Active";
+    saveData();
+    renderPackageList();
+    if (activePackageId === pkg.id) renderDashboard(pkg);
+  }
+
+  if (button.dataset.packageAction === "delete") {
+    if (!window.confirm("Delete this access package?")) return;
+    appData.packages = appData.packages.filter((item) => item.id !== pkg.id);
+    if (activePackageId === pkg.id) {
+      activePackageId = null;
+      elements.loginView.classList.remove("hidden");
+      elements.dashboardView.classList.add("hidden");
+      updatePageMode();
+    }
+    saveData();
+    renderPackageList();
+  }
+});
+
+elements.resetDemoButton.addEventListener("click", () => {
+  if (!window.confirm("Reset all demo data?")) return;
+  appData = seedData();
+  saveData();
+  activePackageId = null;
+  elements.loginView.classList.remove("hidden");
+  elements.dashboardView.classList.add("hidden");
+  updatePageMode();
+  resetFeatureForm();
+  resetPackageForm();
+  renderAdmin();
+});
+
+resetPackageForm();
+resetFeatureForm();
+renderAdmin();
+updatePageMode();

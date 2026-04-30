@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en" class="login-active">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Access Activation Console</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="login-active">
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">A</span>
+          <div>
+            <p class="eyebrow">Secure Package Access</p>
+            <h1>Access Activation Console</h1>
+          </div>
+        </div>
+        <nav class="view-switch" aria-label="Primary views">
+          <button class="switch-button active" type="button" data-view="user" aria-selected="true">User Portal</button>
+          <button class="switch-button" type="button" data-view="admin" aria-selected="false">Admin Panel</button>
+        </nav>
+      </header>
+
+      <main>
+        <section class="view active" id="userView">
+          <div class="login-layout hyper-login" id="loginView">
+            <div class="cyber-frame">
+              <span class="circuit-rail rail-left" aria-hidden="true"></span>
+              <span class="circuit-rail rail-right" aria-hidden="true"></span>
+
+              <section class="hyper-hero" aria-label="Hyper Hook Access">
+                <div class="hyper-logo" aria-hidden="true">
+                  <span>H</span>
+                </div>
+                <h2>HYPER HOOK <span>ACCESS</span></h2>
+                <p>SECURE <span></span> PRIVATE <span></span> POWERFUL</p>
+              </section>
+
+              <section class="hyper-card login-panel">
+                <div class="lock-orb" aria-hidden="true">
+                  <span></span>
+                </div>
+                <div class="login-intro">
+                  <h3>WELCOME BACK</h3>
+                  <p>Enter your access password to continue</p>
+                </div>
+
+                <form id="loginForm" autocomplete="off">
+                  <label class="sr-only" for="loginPassword">Access Password / Login Key</label>
+                  <div class="password-shell">
+                    <span class="input-lock" aria-hidden="true"></span>
+                    <input id="loginPassword" name="loginPassword" type="password" placeholder="Enter Access Password" required>
+                    <button class="password-toggle" type="button" id="togglePasswordButton" aria-label="Show password">SHOW</button>
+                  </div>
+
+                  <div class="login-options">
+                    <label class="remember-line">
+                      <input type="checkbox" id="rememberAccess" checked>
+                      <span>Remember me</span>
+                    </label>
+                    <p>Need access? <button class="login-admin-link" type="button" id="contactAdminLoginButton">Contact Admin</button></p>
+                  </div>
+
+                  <button class="login-submit" type="submit">
+                    <span aria-hidden="true">-></span>
+                    LOGIN
+                  </button>
+                  <p class="form-message" id="loginMessage" role="alert"></p>
+                </form>
+
+                <div class="secure-note">
+                  <span class="shield-mark" aria-hidden="true"></span>
+                  <p><strong>This is a secure access portal.</strong><br>Unauthorized access is strictly prohibited.</p>
+                </div>
+              </section>
+
+              <p class="hyper-copyright">&copy; 2026 <span>HYPER HOOK ACCESS.</span> All rights reserved.</p>
+            </div>
+
+            <section class="login-benefits" aria-label="Access benefits">
+              <article>
+                <span class="benefit-icon shield-mark" aria-hidden="true"></span>
+                <h3>SECURE ACCESS</h3>
+                <p>Protected &amp; Encrypted</p>
+              </article>
+              <article>
+                <span class="benefit-icon bolt-mark" aria-hidden="true">P</span>
+                <h3>FAST PERFORMANCE</h3>
+                <p>Optimized System</p>
+              </article>
+              <article>
+                <span class="benefit-icon support-mark" aria-hidden="true">24</span>
+                <h3>24/7 SUPPORT</h3>
+                <p>We are here for you</p>
+              </article>
+            </section>
+
+            <div class="powered-line">
+              <span></span>
+              <strong>POWERED BY <em>HYPER SYSTEM</em></strong>
+              <span></span>
+            </div>
+          </div>
+
+          <section class="dashboard hidden" id="dashboardView">
+            <div class="dashboard-console">
+              <header class="portal-hero">
+                <div class="portal-topline">
+                  <span>HOOK WEB PORTAL</span>
+                  <button class="portal-logout" type="button" id="logoutButton">Logout</button>
+                </div>
+                <h2 id="dashboardTitle">Welcome to the Hyper Hook Web Portal</h2>
+                <p id="dashboardSubtitle">Click the button below to install</p>
+                <div class="portal-actions install-stage" id="installStart">
+                  <button class="portal-button primary-portal-button" type="button" id="startInstallButton">Install</button>
+                  <button class="portal-button" type="button" id="contactButton">Contact US</button>
+                </div>
+                <p class="form-message neutral portal-message" id="contactMessage"></p>
+              </header>
+
+              <section class="portal-details" aria-label="Access details">
+                <article class="portal-card">
+                  <p>Device Details</p>
+                  <dl>
+                    <div>
+                      <dt>Device Name:</dt>
+                      <dd id="dashboardDeviceName">-</dd>
+                    </div>
+                    <div>
+                      <dt>Serial Number:</dt>
+                      <dd id="deviceDetails">-</dd>
+                    </div>
+                  </dl>
+                </article>
+                <article class="portal-card">
+                  <p>Legal and Regulatory</p>
+                  <dl>
+                    <div>
+                      <dt>Package Status:</dt>
+                      <dd id="packageStatus">-</dd>
+                    </div>
+                    <div>
+                      <dt>Compliance:</dt>
+                      <dd id="dashboardLegalInfo">-</dd>
+                    </div>
+                  </dl>
+                </article>
+                <article class="portal-card">
+                  <p>Package Details</p>
+                  <dl>
+                    <div>
+                      <dt>Package Name:</dt>
+                      <dd id="packageName">-</dd>
+                    </div>
+                    <div>
+                      <dt>Expiry:</dt>
+                      <dd id="packageExpiry">-</dd>
+                    </div>
+                    <div>
+                      <dt>Details:</dt>
+                      <dd id="dashboardPackageDetails">-</dd>
+                    </div>
+                  </dl>
+                </article>
+              </section>
+
+              <section class="portal-panel feature-panel">
+                <div class="portal-section-heading">
+                  <div>
+                    <span>Feature Modules</span>
+                    <h3>Available Features</h3>
+                  </div>
+                  <strong id="featureCount">0 Active</strong>
+                </div>
+                <div class="feature-grid" id="dashboardFeatures"></div>
+              </section>
+
+              <section class="portal-panel install-panel">
+                <div class="portal-section-heading">
+                  <div>
+                    <span>Installation</span>
+                    <h3>Access Setup</h3>
+                  </div>
+                  <strong id="installState">Waiting</strong>
+                </div>
+
+                <div class="step-track" aria-label="Installation progress steps">
+                  <span class="step-dot active" data-step-dot="activation">1</span>
+                  <span class="step-dot" data-step-dot="serial">2</span>
+                  <span class="step-dot" data-step-dot="files">3</span>
+                  <span class="step-dot" data-step-dot="web">4</span>
+                  <span class="step-dot" data-step-dot="cert">5</span>
+                  <span class="step-dot" data-step-dot="final">6</span>
+                </div>
+
+                <div id="activationStage" class="install-stage hidden">
+                  <div class="step-flow-card serial-flow-card">
+                    <h3>Web Access Activation</h3>
+                    <div class="activation-key-box">
+                      <input id="activationCodeOutput" type="text" readonly>
+                    </div>
+                    <button class="step-blue-button" type="button" id="copyActivationButton" aria-label="Copy activation code">
+                      <span aria-hidden="true">Copy Key</span>
+                    </button>
+                    <form id="serialForm" autocomplete="off">
+                      <label for="serialInput">Enter Your Device Serial Number</label>
+                      <input id="serialInput" type="text" placeholder="" required>
+                      <button class="step-blue-button" type="submit">Submit</button>
+                      <p class="form-message" id="serialMessage" role="alert"></p>
+                    </form>
+                  </div>
+                </div>
+
+                <div id="progressStage" class="install-stage hidden">
+                  <h3 class="generated-heading">Key Generated for Installation</h3>
+                  <div class="step-flow-card loading-flow-card">
+                    <h4 id="progressTitle">Installing Files...</h4>
+                    <div class="progress-shell" aria-label="Installation progress">
+                      <span id="mainProgressBar"></span>
+                    </div>
+                    <strong id="mainProgressPercent">0%</strong>
+                    <p class="progress-status" id="progressStatus">Installing Files: 0%</p>
+                  </div>
+                </div>
+
+                <div id="webCodeStage" class="install-stage hidden">
+                  <h3 class="generated-heading">Final Step: Key Generated for Installation</h3>
+                  <div class="step-flow-card certificate-flow-card">
+                    <h4>Installing Files...</h4>
+                    <div class="static-progress" aria-hidden="true"><span></span><strong>100%</strong></div>
+                    <form id="webCodeForm" autocomplete="off">
+                      <label for="webCodeInput">Enter Web Access Activation Code</label>
+                      <input id="webCodeInput" type="text" placeholder="Package activation code" required>
+                      <button class="step-blue-button" type="submit">Verify</button>
+                      <p class="form-message" id="webCodeMessage" role="alert"></p>
+                    </form>
+                  </div>
+                </div>
+
+                <div id="certificateStage" class="install-stage hidden">
+                  <h3 class="generated-heading">Access Certificate Verification</h3>
+                  <div class="step-flow-card certificate-flow-card">
+                    <h4>Certificate Required</h4>
+                    <div class="static-progress" aria-hidden="true"><span></span><strong>100%</strong></div>
+                    <form id="certificateForm" autocomplete="off">
+                      <label for="certificateInput">Enter Web Access Certificate Code</label>
+                      <input id="certificateInput" type="text" placeholder="CERT-1111" required>
+                      <button class="step-blue-button" type="submit">Activate</button>
+                      <p class="form-message" id="certificateMessage" role="alert"></p>
+                    </form>
+                  </div>
+                </div>
+
+                <div id="finalStage" class="install-stage hidden">
+                  <div class="final-meta">
+                    <span>Final Installation</span>
+                    <strong id="finalTimeLabel">50 minutes</strong>
+                  </div>
+                  <p class="progress-status" id="finalProgressStatus">Starting final installation...</p>
+                  <div class="progress-shell">
+                    <span id="finalProgressBar"></span>
+                  </div>
+                  <strong id="finalProgressPercent">0%</strong>
+                </div>
+
+                <div id="successStage" class="install-stage success-stage hidden">
+                  <span class="success-icon" aria-hidden="true">OK</span>
+                  <h3 id="successMessage">Installation Complete</h3>
+                  <button class="secondary-button" type="button" id="restartFlowButton">Run Again</button>
+                </div>
+              </section>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="adminView">
+          <div class="admin-header">
+            <div>
+              <p class="eyebrow">Control Center</p>
+              <h2>Admin Panel</h2>
+            </div>
+            <div class="button-row">
+              <button class="ghost-button" type="button" id="adminLogoutButton">Admin Logout</button>
+              <button class="secondary-button" type="button" id="resetDemoButton">Reset Demo Data</button>
+            </div>
+          </div>
+
+          <section class="panel admin-settings-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Admin Account</p>
+                <h3>Login & Contact Settings</h3>
+              </div>
+            </div>
+            <form id="adminSettingsForm" class="stacked-form" autocomplete="off">
+              <div class="two-column">
+                <label>
+                  Admin Panel Password
+                  <input id="adminPasswordInput" type="text" placeholder="ADMIN-2026" required>
+                </label>
+                <label>
+                  Selected Contact Name
+                  <input id="adminContactLabel" type="text" placeholder="WhatsApp Admin">
+                </label>
+              </div>
+              <div class="two-column">
+                <label>
+                  Selected Contact
+                  <input id="adminContactValue" type="text" placeholder="https://wa.me/8801000000000">
+                </label>
+                <label>
+                  Contact Action
+                  <select id="adminContactMode">
+                    <option value="auto">Auto open/copy</option>
+                    <option value="open">Open link</option>
+                    <option value="copy">Copy contact</option>
+                  </select>
+                </label>
+              </div>
+              <div class="button-row">
+                <button class="primary-button" type="submit">Save Admin Settings</button>
+                <p class="form-message" id="adminSettingsMessage" role="alert"></p>
+              </div>
+            </form>
+          </section>
+
+          <div class="admin-grid">
+            <section class="panel admin-panel">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Package Management</p>
+                  <h3 id="packageFormTitle">Create Package</h3>
+                </div>
+                <button class="ghost-button compact" type="button" id="clearPackageFormButton">Clear</button>
+              </div>
+
+              <form id="packageForm" class="stacked-form" autocomplete="off">
+                <input type="hidden" id="packageId">
+                <div class="two-column">
+                  <label>
+                    Package Name
+                    <input id="pkgName" type="text" placeholder="7 Days Premium" required>
+                  </label>
+                  <label>
+                    Login Password / Access Key
+                    <input id="pkgPassword" type="text" placeholder="KEY-7DAY-2026" required>
+                  </label>
+                </div>
+
+                <div class="two-column">
+                  <label>
+                    Validity
+                    <select id="pkgValidity">
+                      <option value="1">1 day</option>
+                      <option value="7">7 days</option>
+                      <option value="30">30 days</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                  </label>
+                  <label id="customValidityWrap" class="hidden">
+                    Custom Days
+                    <input id="pkgCustomDays" type="number" min="1" step="1" value="1">
+                  </label>
+                  <label>
+                    Status
+                    <select id="pkgStatusInput">
+                      <option value="Active">Active</option>
+                      <option value="Disabled">Disabled</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="two-column">
+                  <label>
+                    Device Serial Number
+                    <input id="pkgSerial" type="text" placeholder="F2LXR9A0Q05N" required>
+                  </label>
+                  <label>
+                    Device Name
+                    <input id="pkgDeviceName" type="text" placeholder="iPhone 16 Pro Max">
+                  </label>
+                </div>
+
+                <div class="two-column">
+                  <label>
+                    Random Activation Code Mode
+                    <select id="pkgActivationMode">
+                      <option value="random">Random every install</option>
+                      <option value="fixed">Use admin code</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="two-column">
+                  <label>
+                    Legal and Regulatory
+                    <textarea id="pkgLegalInfo" rows="3" placeholder="Regulatory model, compliance or legal details"></textarea>
+                  </label>
+                  <label>
+                    Package Details
+                    <textarea id="pkgPackageDetails" rows="3" placeholder="Package notes shown on user dashboard"></textarea>
+                  </label>
+                </div>
+
+                <div class="two-column">
+                  <label>
+                    Web Access Activation Code
+                    <input id="pkgActivationCode" type="text" placeholder="WEB-ACT-8K29-XP41">
+                  </label>
+                  <label>
+                    Package Web Access Activation Code
+                    <input id="pkgWebCode" type="text" placeholder="WEB-7DAY-8899" required>
+                  </label>
+                </div>
+
+                <div class="two-column">
+                  <label>
+                    Access Certificate Code
+                    <input id="pkgCertificate" type="text" placeholder="CERT-2222" required>
+                  </label>
+                  <label>
+                    Contact Info
+                    <input id="pkgContact" type="text" placeholder="WhatsApp: +880...">
+                  </label>
+                </div>
+
+                <div class="two-column">
+                  <label>
+                    Loading Time
+                    <select id="pkgLoadingPreset">
+                      <option value="50">50 minutes</option>
+                      <option value="60">60 minutes</option>
+                      <option value="90">90 minutes</option>
+                      <option value="100">100 minutes</option>
+                      <option value="custom">Custom</option>
+                    </select>
+                  </label>
+                  <label id="customLoadingWrap" class="hidden">
+                    Custom Minutes
+                    <input id="pkgCustomLoading" type="number" min="1" step="1" value="50">
+                  </label>
+                  <label>
+                    Final Success Message
+                    <input id="pkgFinalMessage" type="text" placeholder="Access Activated Successfully" required>
+                  </label>
+                </div>
+
+                <fieldset class="feature-picker">
+                  <legend>Select Features</legend>
+                  <div id="featurePicker"></div>
+                </fieldset>
+
+                <div class="button-row">
+                  <button class="primary-button" type="submit" id="savePackageButton">Save Package</button>
+                  <p class="form-message" id="packageFormMessage" role="alert"></p>
+                </div>
+              </form>
+            </section>
+
+            <section class="panel admin-panel">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Features Management</p>
+                  <h3 id="featureFormTitle">Add Feature</h3>
+                </div>
+                <button class="ghost-button compact" type="button" id="clearFeatureFormButton">Clear</button>
+              </div>
+
+              <form id="featureForm" class="stacked-form" autocomplete="off">
+                <input type="hidden" id="featureId">
+                <div class="two-column">
+                  <label>
+                    Feature Name
+                    <input id="featureName" type="text" placeholder="AimBot" required>
+                  </label>
+                  <label>
+                    Feature Icon
+                    <input id="featureIcon" type="text" maxlength="4" placeholder="AB">
+                  </label>
+                </div>
+                <label>
+                  Description
+                  <textarea id="featureDescription" rows="3" placeholder="Enabled for this package"></textarea>
+                </label>
+                <label>
+                  Status
+                  <select id="featureStatus">
+                    <option value="Active">Active</option>
+                    <option value="Disabled">Disabled</option>
+                  </select>
+                </label>
+                <div class="button-row">
+                  <button class="primary-button" type="submit" id="saveFeatureButton">Save Feature</button>
+                  <p class="form-message" id="featureFormMessage" role="alert"></p>
+                </div>
+              </form>
+
+              <div class="list-stack" id="featureList"></div>
+            </section>
+          </div>
+
+          <section class="panel package-list-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Access List</p>
+                <h3>Packages</h3>
+              </div>
+              <span class="count-pill" id="packageCount">0 Packages</span>
+            </div>
+            <div class="list-stack" id="packageList"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
