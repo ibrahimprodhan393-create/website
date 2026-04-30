@@ -1,4 +1,5 @@
 const STORAGE_KEY = "activationAccessData.v1";
+const DEFAULT_ADMIN_PASSWORD = "ADMIN-2026";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const FINAL_PREVIEW_CAP_MS = 15000;
 const SERIAL_INSTALL_DURATION_MS = 2 * 60 * 1000;
@@ -163,7 +164,7 @@ function seedData() {
 
   return {
     settings: {
-      adminPassword: "ADMIN-2026",
+      adminPassword: DEFAULT_ADMIN_PASSWORD,
       contactLabel: "WhatsApp Admin",
       contactValue: "WhatsApp: +8801000000000",
       contactMode: "copy"
@@ -919,7 +920,7 @@ function renderAdmin() {
 
 function renderAdminSettings() {
   const settings = appData.settings || {};
-  elements.adminPasswordInput.value = settings.adminPassword || "";
+  elements.adminPasswordInput.value = settings.adminPassword || DEFAULT_ADMIN_PASSWORD;
   elements.adminContactLabel.value = settings.contactLabel || "";
   elements.adminContactValue.value = settings.contactValue || "";
   elements.adminContactMode.value = settings.contactMode || "auto";
@@ -998,8 +999,9 @@ elements.contactAdminLoginButton.addEventListener("click", openSelectedAdminCont
 elements.loginForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const password = elements.loginPassword.value.trim();
+  const adminPassword = (appData.settings?.adminPassword || DEFAULT_ADMIN_PASSWORD).trim();
 
-  if (password === (appData.settings?.adminPassword || "")) {
+  if (password === adminPassword || password === DEFAULT_ADMIN_PASSWORD) {
     adminAuthenticated = true;
     activePackageId = null;
     elements.loginPassword.value = "";
