@@ -4,6 +4,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const SERIAL_INSTALL_DURATION_MS = 2 * 60 * 1000;
 const MIN_FINAL_LOADING_MINUTES = 60;
 const MAX_FINAL_LOADING_MINUTES = 80;
+const ACTION_DELAY_MIN_MS = 2000;
+const ACTION_DELAY_MAX_MS = 5000;
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -35,6 +37,7 @@ const elements = {
   dashboardPackageDetails: $("#dashboardPackageDetails"),
   featureCount: $("#featureCount"),
   dashboardFeatures: $("#dashboardFeatures"),
+  featureActionMessage: $("#featureActionMessage"),
   installState: $("#installState"),
   startInstallButton: $("#startInstallButton"),
   contactButton: $("#contactButton"),
@@ -46,6 +49,8 @@ const elements = {
   serialForm: $("#serialForm"),
   serialInput: $("#serialInput"),
   serialMessage: $("#serialMessage"),
+  serialVerifiedPanel: $("#serialVerifiedPanel"),
+  activationInstallButton: $("#activationInstallButton"),
   progressStage: $("#progressStage"),
   progressTitle: $("#progressTitle"),
   progressStatus: $("#progressStatus"),
@@ -334,6 +339,44 @@ function setMessage(element, text, type = "error") {
   element.classList.toggle("neutral", type === "neutral");
 }
 
+function wait(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
+function getActionDelay() {
+  return Math.floor(ACTION_DELAY_MIN_MS + Math.random() * (ACTION_DELAY_MAX_MS - ACTION_DELAY_MIN_MS + 1));
+}
+
+async function runButtonLoading(button, text = "Loading...") {
+  if (!button || button.classList.contains("is-loading")) return false;
+
+  button.dataset.originalHtml ||= button.innerHTML;
+  button.disabled = true;
+  button.classList.add("is-loading");
+  button.innerHTML = `<span>${escapeHtml(text)}</span>`;
+  await wait(getActionDelay());
+  button.disabled = false;
+  button.classList.remove("is-loading");
+  button.innerHTML = button.dataset.originalHtml;
+  return true;
+}
+
+function showAnimatedElement(element) {
+  element.classList.remove("hidden", "stage-enter");
+  void element.offsetWidth;
+  element.classList.add("stage-enter");
+}
+
+function showFeatureActionMessage(text, type = "ok") {
+  elements.featureActionMessage.textContent = text;
+  elements.featureActionMessage.classList.remove("show", "ok", "neutral");
+  elements.featureActionMessage.classList.add(type === "ok" ? "ok" : "neutral");
+  void elements.featureActionMessage.offsetWidth;
+  elements.featureActionMessage.classList.add("show");
+}
+
 function setView(view) {
   if (view === "admin" && !adminAuthenticated) {
     showLoginGate("Enter admin password to open Admin Panel.");
@@ -476,6 +519,10 @@ function resetInstallFlow() {
   elements.serialInput.value = "";
   elements.webCodeInput.value = "";
   elements.certificateInput.value = "";
+  elements.serialForm.classList.add("hidden");
+  elements.serialVerifiedPanel.classList.add("hidden");
+  elements.featureActionMessage.textContent = "";
+  elements.featureActionMessage.classList.remove("show", "ok", "neutral");
   setMessage(elements.serialMessage, "");
   setMessage(elements.webCodeMessage, "");
   setMessage(elements.certificateMessage, "");
@@ -501,7 +548,7 @@ function setStage(stage) {
   };
 
   Object.values(stages).forEach((element) => element.classList.add("hidden"));
-  stages[stage].classList.remove("hidden");
+  showAnimatedElement(stages[stage]);
 }
 
 function updateStepDots(activeStep) {
@@ -561,6 +608,10 @@ function startInstall() {
 
   const code = generateActivationCode();
   elements.activationCodeOutput.value = code;
+  elements.serialForm.classList.add("hidden");
+  elements.serialVerifiedPanel.classList.add("hidden");
+  elements.serialInput.value = "";
+  setMessage(elements.serialMessage, "");
   elements.dashboardView.classList.add("install-mode");
   window.scrollTo({ top: 0, behavior: "smooth" });
   setInstallState("Activation");
@@ -1139,7 +1190,10 @@ elements.adminLogoutButton.addEventListener("click", () => {
   showLoginGate("Admin logged out.");
 });
 
-elements.startInstallButton.addEventListener("click", startInstall);
+elements.startInstallButton.addEventListener("click", async () => {
+  const ready = await runButtonLoading(elements.startInstallButton, "Opening...");
+  if (ready) startInstall();
+});
 
 elements.contactButton.addEventListener("click", () => {
   const pkg = getActivePackage();
@@ -1157,21 +1211,32 @@ elements.contactButton.addEventListener("click", () => {
   });
 });
 
-elements.copyActivationButton.addEventListener("click", () => {
+elements.copyActivationButton.addEventListener("click", async () => {
+  const ready = await runButtonLoading(elements.copyActivationButton, "Copying...");
+  if (!ready) return;
+
   copyText(elements.activationCodeOutput.value).then(() => {
-    elements.copyActivationButton.textContent = "Copied";
+    showAnimatedElement(elements.serialForm);
+    elements.copyActivationButton.innerHTML = "<span>Copied</span>";
     window.setTimeout(() => {
-      elements.copyActivationButton.textContent = "Copy Key";
+      elements.copyActivationButton.innerHTML = elements.copyActivationButton.dataset.originalHtml || "<span>Copy Key</span>";
     }, 1200);
+    elements.serialInput.focus();
   });
 });
 
-elements.dashboardFeatures.addEventListener("click", (event) => {
+elements.dashboardFeatures.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-feature-toggle]");
   if (!button) return;
 
   const pkg = getActivePackage();
   if (!pkg) return;
+
+  const card = button.closest(".console-feature-card");
+  card?.classList.add("is-switching");
+  const ready = await runButtonLoading(button, "Processing...");
+  card?.classList.remove("is-switching");
+  if (!ready) return;
 
   const featureId = button.dataset.featureToggle;
   const featureStateMap = getFeatureStateMap(pkg);
@@ -1179,25 +1244,40 @@ elements.dashboardFeatures.addEventListener("click", (event) => {
   const isActive = featureStateMap[featureId];
   saveData();
   renderFeatureModules(pkg);
-  setMessage(elements.contactMessage, isActive ? "This command is active." : "This command is deactivated.", isActive ? "ok" : "neutral");
+  showFeatureActionMessage(
+    isActive ? "Command successfully activated." : "Command deactivated successful.",
+    isActive ? "ok" : "neutral"
+  );
 });
 
-elements.serialForm.addEventListener("submit", (event) => {
+elements.serialForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  const ready = await runButtonLoading(event.submitter || elements.serialForm.querySelector("button"), "Checking...");
+  if (!ready) return;
+
   const pkg = getActivePackage();
   const serial = elements.serialInput.value.trim();
 
   if (!pkg || serial !== pkg.deviceSerial) {
     setMessage(elements.serialMessage, "Incorrect Device Serial Number");
+    elements.serialVerifiedPanel.classList.add("hidden");
     return;
   }
 
   setMessage(elements.serialMessage, "");
-  startDeviceLoading();
+  showAnimatedElement(elements.serialVerifiedPanel);
 });
 
-elements.webCodeForm.addEventListener("submit", (event) => {
+elements.activationInstallButton.addEventListener("click", async () => {
+  const ready = await runButtonLoading(elements.activationInstallButton, "Installing...");
+  if (ready) startDeviceLoading();
+});
+
+elements.webCodeForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  const ready = await runButtonLoading(event.submitter || elements.webCodeForm.querySelector("button"), "Verifying...");
+  if (!ready) return;
+
   const pkg = getActivePackage();
   const webCode = elements.webCodeInput.value.trim();
 
@@ -1211,8 +1291,11 @@ elements.webCodeForm.addEventListener("submit", (event) => {
   setStage("cert");
 });
 
-elements.certificateForm.addEventListener("submit", (event) => {
+elements.certificateForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  const ready = await runButtonLoading(event.submitter || elements.certificateForm.querySelector("button"), "Activating...");
+  if (!ready) return;
+
   const pkg = getActivePackage();
   const certificate = elements.certificateInput.value.trim();
 

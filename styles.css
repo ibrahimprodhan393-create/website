@@ -471,6 +471,10 @@ body.dashboard-active .feature-grid {
   min-height: calc(100vh - 110px);
 }
 
+.stage-enter {
+  animation: stageRise 0.42s ease both;
+}
+
 #installState,
 .step-track {
   display: none;
@@ -531,6 +535,11 @@ body.dashboard-active .feature-card {
   opacity: 0.58;
 }
 
+.console-feature-card.is-switching {
+  opacity: 1;
+  animation: featurePulse 0.9s ease infinite;
+}
+
 .console-feature-card.is-disabled .feature-title-row span {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.18);
@@ -541,6 +550,10 @@ body.dashboard-active .feature-card {
 }
 
 .console-feature-card button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-height: 36px;
   margin-top: 12px;
   padding: 0 12px;
@@ -549,6 +562,37 @@ body.dashboard-active .feature-card {
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 8px;
   font-weight: 900;
+}
+
+.feature-action-message {
+  min-height: 0;
+  max-height: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #ffffff;
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition: max-height 0.28s ease, margin 0.28s ease, opacity 0.28s ease, transform 0.28s ease;
+  text-align: center;
+  font-weight: 900;
+}
+
+.feature-action-message.show {
+  max-height: 54px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  background: rgba(43, 217, 134, 0.18);
+  border: 1px solid rgba(74, 255, 171, 0.34);
+  border-radius: 8px;
+  box-shadow: 0 0 24px rgba(74, 255, 171, 0.14);
+}
+
+.feature-action-message.neutral {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.24);
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.08);
 }
 
 body.dashboard-active .install-panel label,
@@ -626,6 +670,10 @@ body.dashboard-active .install-panel h4 {
   text-align: left;
 }
 
+.serial-flow-card form.hidden {
+  display: none;
+}
+
 .certificate-flow-card form {
   margin-top: 18px;
 }
@@ -652,6 +700,35 @@ body.dashboard-active .install-panel h4 {
   margin: 0;
   color: #c23f35;
   text-align: center;
+}
+
+.serial-verified-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: 26px;
+  color: #202136;
+  text-align: center;
+}
+
+.serial-verified-panel.hidden {
+  display: none;
+}
+
+.serial-verified-panel strong {
+  color: #171829;
+  font-size: 1.02rem;
+  line-height: 1.28;
+}
+
+.serial-verified-panel p {
+  margin: 0;
+  color: #202136;
+  font-size: 0.98rem;
+}
+
+.serial-verified-panel span {
+  color: #149423;
+  font-weight: 900;
 }
 
 .loading-flow-card {
@@ -702,6 +779,14 @@ body.dashboard-active .install-panel h4 {
   color: #33344a;
   font-size: 1rem;
   font-weight: 500;
+}
+
+.protection-note {
+  margin: 10px 0 0;
+  color: #202136;
+  font-size: 0.98rem;
+  font-weight: 900;
+  text-align: center;
 }
 
 .certificate-flow-card .static-progress strong {
@@ -1617,6 +1702,24 @@ textarea:focus {
   padding-top: 4px;
 }
 
+button.is-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+button.is-loading::before {
+  content: "";
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.78s linear infinite;
+}
+
 .button-row {
   flex-wrap: wrap;
   gap: 10px;
@@ -2285,5 +2388,34 @@ body.login-active .powered-line {
 
   body.login-active .cyber-frame {
     max-height: calc(100dvh - 118px);
+  }
+}
+
+@keyframes stageRise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes featurePulse {
+  0%,
+  100% {
+    box-shadow: 0 12px 30px rgba(74, 255, 171, 0.08);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 16px 40px rgba(74, 255, 171, 0.18);
+    transform: scale(1.01);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }

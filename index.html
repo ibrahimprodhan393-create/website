@@ -174,6 +174,7 @@
                   <strong id="featureCount">0 Active</strong>
                 </div>
                 <div class="feature-grid" id="dashboardFeatures"></div>
+                <p class="feature-action-message" id="featureActionMessage" aria-live="polite"></p>
               </section>
 
               <section class="portal-panel install-panel">
@@ -203,12 +204,17 @@
                     <button class="step-blue-button" type="button" id="copyActivationButton" aria-label="Copy activation code">
                       <span aria-hidden="true">Copy Key</span>
                     </button>
-                    <form id="serialForm" autocomplete="off">
+                    <form id="serialForm" class="serial-form hidden" autocomplete="off">
                       <label for="serialInput">Enter Your Device Serial Number</label>
                       <input id="serialInput" type="text" placeholder="" required>
                       <button class="step-blue-button" type="submit">Submit</button>
                       <p class="form-message" id="serialMessage" role="alert"></p>
                     </form>
+                    <div id="serialVerifiedPanel" class="serial-verified-panel hidden" aria-live="polite">
+                      <strong>HOOK services are already registered with this device.</strong>
+                      <p>Security Module: <span>B23-FIREWALL</span></p>
+                      <button class="step-blue-button" type="button" id="activationInstallButton">Install</button>
+                    </div>
                   </div>
                 </div>
 
@@ -221,6 +227,7 @@
                     </div>
                     <strong id="mainProgressPercent">0%</strong>
                     <p class="progress-status" id="progressStatus">Installing Files: 0%</p>
+                    <p class="protection-note">Installing system protection.</p>
                   </div>
                 </div>
 
