@@ -458,6 +458,7 @@ body.dashboard-active .feature-grid {
 .dashboard.install-mode .portal-hero,
 .dashboard.install-mode .portal-details,
 .dashboard.install-mode .feature-panel,
+.dashboard.install-mode .game-inject-panel,
 .dashboard.install-mode .subscription-panel {
   display: none;
 }
@@ -594,6 +595,28 @@ body.dashboard-active .feature-card {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.24);
   box-shadow: 0 0 24px rgba(255, 255, 255, 0.08);
+}
+
+.game-inject-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.game-inject-actions .portal-button {
+  width: 100%;
+  min-height: 48px;
+  background:
+    linear-gradient(135deg, rgba(122, 227, 255, 0.16), rgba(181, 108, 255, 0.18)),
+    rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 24px rgba(122, 227, 255, 0.12);
+}
+
+.game-inject-actions .portal-button:hover {
+  border-color: rgba(122, 227, 255, 0.48);
+  box-shadow: 0 0 30px rgba(122, 227, 255, 0.18);
 }
 
 .subscription-panel {
@@ -2203,6 +2226,10 @@ button.is-loading::before {
   .portal-card div {
     flex-direction: column;
     gap: 3px;
+  }
+
+  .game-inject-actions {
+    grid-template-columns: 1fr;
   }
 
   body.login-active .hyper-login {

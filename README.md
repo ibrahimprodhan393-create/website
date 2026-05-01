@@ -16,3 +16,4 @@ Feature toggles are optional and default to deactivated. Toggle actions show ani
 The install stage opens as its own focused screen without numbered step boxes. Copy Key reveals the serial form, a correct serial shows the registered service/security module message and an Install button, then the firmware/file installation loading page runs for 2 minutes before asking for the package web activation code.
 Final installation loading hides the minute label on the user screen, shows a large animated final installation view, and runs 10-minute checking phases until the admin package loading time is complete.
 The user dashboard includes a live reverse subscription countdown until package expiry.
+The dashboard also includes Free Fire and Free Fire Max injection buttons above the live countdown.

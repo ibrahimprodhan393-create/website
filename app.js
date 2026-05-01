@@ -50,6 +50,9 @@ const elements = {
   featureCount: $("#featureCount"),
   dashboardFeatures: $("#dashboardFeatures"),
   featureActionMessage: $("#featureActionMessage"),
+  freeFireButton: $("#freeFireButton"),
+  freeFireMaxButton: $("#freeFireMaxButton"),
+  gameInjectMessage: $("#gameInjectMessage"),
   subscriptionCountdown: $("#subscriptionCountdown"),
   subscriptionCountdownText: $("#subscriptionCountdownText"),
   installState: $("#installState"),
@@ -393,11 +396,15 @@ function showAnimatedElement(element) {
 }
 
 function showFeatureActionMessage(text, type = "ok") {
-  elements.featureActionMessage.textContent = text;
-  elements.featureActionMessage.classList.remove("show", "ok", "neutral");
-  elements.featureActionMessage.classList.add(type === "ok" ? "ok" : "neutral");
-  void elements.featureActionMessage.offsetWidth;
-  elements.featureActionMessage.classList.add("show");
+  showAnimatedMessage(elements.featureActionMessage, text, type);
+}
+
+function showAnimatedMessage(element, text, type = "ok") {
+  element.textContent = text;
+  element.classList.remove("show", "ok", "neutral");
+  element.classList.add(type === "ok" ? "ok" : "neutral");
+  void element.offsetWidth;
+  element.classList.add("show");
 }
 
 function setView(view) {
@@ -574,6 +581,8 @@ function resetInstallFlow() {
   elements.serialVerifiedPanel.classList.add("hidden");
   elements.featureActionMessage.textContent = "";
   elements.featureActionMessage.classList.remove("show", "ok", "neutral");
+  elements.gameInjectMessage.textContent = "";
+  elements.gameInjectMessage.classList.remove("show", "ok", "neutral");
   setMessage(elements.serialMessage, "");
   setMessage(elements.webCodeMessage, "");
   setMessage(elements.certificateMessage, "");
@@ -1258,8 +1267,18 @@ elements.adminLogoutButton.addEventListener("click", () => {
 });
 
 elements.startInstallButton.addEventListener("click", async () => {
-  const ready = await runButtonLoading(elements.startInstallButton, "Opening...");
+  const ready = await runButtonLoading(elements.startInstallButton, "Installing...");
   if (ready) startInstall();
+});
+
+elements.freeFireButton.addEventListener("click", async () => {
+  const ready = await runButtonLoading(elements.freeFireButton, "Injecting...");
+  if (ready) showAnimatedMessage(elements.gameInjectMessage, "Free Fire Injected", "ok");
+});
+
+elements.freeFireMaxButton.addEventListener("click", async () => {
+  const ready = await runButtonLoading(elements.freeFireMaxButton, "Injecting...");
+  if (ready) showAnimatedMessage(elements.gameInjectMessage, "Free Fire Max Injected", "ok");
 });
 
 elements.contactButton.addEventListener("click", () => {
