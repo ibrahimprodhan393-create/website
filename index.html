@@ -177,6 +177,18 @@
                 <p class="feature-action-message" id="featureActionMessage" aria-live="polite"></p>
               </section>
 
+              <section class="portal-panel subscription-panel">
+                <div class="portal-section-heading">
+                  <div>
+                    <span>Live Access</span>
+                    <h3>Subscription Countdown</h3>
+                  </div>
+                  <strong>LIVE</strong>
+                </div>
+                <div class="subscription-countdown" id="subscriptionCountdown">--d --h --m --s</div>
+                <p id="subscriptionCountdownText">Reverse counting until package expiry.</p>
+              </section>
+
               <section class="portal-panel install-panel">
                 <div class="portal-section-heading">
                   <div>
@@ -259,16 +271,22 @@
                   </div>
                 </div>
 
-                <div id="finalStage" class="install-stage hidden">
-                  <div class="final-meta">
+                <div id="finalStage" class="install-stage final-install-stage hidden">
+                  <div class="final-install-header">
                     <span>Final Installation</span>
-                    <strong id="finalTimeLabel">60 minutes</strong>
+                    <h3>Start Final Installation</h3>
                   </div>
-                  <p class="progress-status" id="finalProgressStatus">Starting final installation...</p>
-                  <div class="progress-shell">
-                    <span id="finalProgressBar"></span>
+                  <div class="final-loader-card">
+                    <div class="final-orbit" aria-hidden="true">
+                      <span></span>
+                    </div>
+                    <p class="progress-status" id="finalProgressStatus">10 Minute Security Protection Checking</p>
+                    <div class="progress-shell final-progress-shell">
+                      <span id="finalProgressBar"></span>
+                    </div>
+                    <strong id="finalProgressPercent">0%</strong>
+                    <p class="final-phase-note" id="finalPhaseNote">Each final installation check runs in a 10 minute security block.</p>
                   </div>
-                  <strong id="finalProgressPercent">0%</strong>
                 </div>
 
                 <div id="successStage" class="install-stage success-stage hidden">

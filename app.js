@@ -6,6 +6,17 @@ const MIN_FINAL_LOADING_MINUTES = 60;
 const MAX_FINAL_LOADING_MINUTES = 80;
 const ACTION_DELAY_MIN_MS = 2000;
 const ACTION_DELAY_MAX_MS = 5000;
+const FINAL_PHASE_MINUTES = 10;
+const FINAL_PHASE_MESSAGES = [
+  "10 Minute Security Protection Checking",
+  "10 Minute Device Module Checking",
+  "10 Minute Firewall Checking",
+  "10 Minute Firewall and Firmware Initialization Checking",
+  "10 Minute Web Activation Checking",
+  "10 Minute All Function and Feature Checking",
+  "10 Minute Device Module Final Checking",
+  "10 Minute Access Stability Checking"
+];
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -13,6 +24,7 @@ const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 let appData = loadData();
 let activePackageId = null;
 let activeTimer = null;
+let countdownTimer = null;
 let adminAuthenticated = false;
 
 const elements = {
@@ -38,6 +50,8 @@ const elements = {
   featureCount: $("#featureCount"),
   dashboardFeatures: $("#dashboardFeatures"),
   featureActionMessage: $("#featureActionMessage"),
+  subscriptionCountdown: $("#subscriptionCountdown"),
+  subscriptionCountdownText: $("#subscriptionCountdownText"),
   installState: $("#installState"),
   startInstallButton: $("#startInstallButton"),
   contactButton: $("#contactButton"),
@@ -65,7 +79,6 @@ const elements = {
   certificateInput: $("#certificateInput"),
   certificateMessage: $("#certificateMessage"),
   finalStage: $("#finalStage"),
-  finalTimeLabel: $("#finalTimeLabel"),
   finalProgressStatus: $("#finalProgressStatus"),
   finalProgressBar: $("#finalProgressBar"),
   finalProgressPercent: $("#finalProgressPercent"),
@@ -317,6 +330,16 @@ function isExpired(pkg) {
   return Date.now() > Number(pkg.expiresAt);
 }
 
+function formatCountdown(ms) {
+  const safeSeconds = Math.max(0, Math.floor(ms / 1000));
+  const days = Math.floor(safeSeconds / 86400);
+  const hours = Math.floor((safeSeconds % 86400) / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const seconds = safeSeconds % 60;
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${days}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+}
+
 function formatDate(timestamp) {
   return new Intl.DateTimeFormat("en", {
     year: "numeric",
@@ -404,6 +427,7 @@ function updatePageMode() {
 
 function showLoginGate(message = "") {
   clearActiveTimer();
+  clearCountdownTimer();
   activePackageId = null;
   elements.dashboardView.classList.add("hidden");
   elements.loginView.classList.remove("hidden");
@@ -417,6 +441,32 @@ function showLoginGate(message = "") {
   setMessage(elements.loginMessage, message, message ? "neutral" : "error");
   updatePageMode();
   elements.loginPassword.focus();
+}
+
+function clearCountdownTimer() {
+  if (countdownTimer) {
+    window.clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+}
+
+function startSubscriptionCountdown(pkg) {
+  clearCountdownTimer();
+
+  const updateCountdown = () => {
+    const remaining = Number(pkg.expiresAt) - Date.now();
+    elements.subscriptionCountdown.textContent = remaining > 0 ? formatCountdown(remaining) : "Expired";
+    elements.subscriptionCountdownText.textContent =
+      remaining > 0 ? "Reverse counting until package expiry." : "This package access has expired.";
+    elements.subscriptionCountdown.classList.toggle("is-expired", remaining <= 0);
+
+    if (remaining <= 0) {
+      clearCountdownTimer();
+    }
+  };
+
+  updateCountdown();
+  countdownTimer = window.setInterval(updateCountdown, 1000);
 }
 
 function updateStatusPill(element, status) {
@@ -504,6 +554,7 @@ function renderDashboard(pkg) {
   elements.dashboardPackageDetails.textContent = pkg.packageDetails || "Package details are assigned by the admin.";
   updateStatusPill(elements.packageStatus, status);
   renderFeatureModules(pkg);
+  startSubscriptionCountdown(pkg);
   saveData();
 
   resetInstallFlow();
@@ -669,19 +720,20 @@ function startFileLoading() {
 function startFinalLoading() {
   const pkg = getActivePackage();
   const loadingMinutes = getFinalLoadingMinutes(pkg);
-  const finalDuration = loadingMinutes * 60 * 1000;
+  const finalMessages = getFinalPhaseMessages(loadingMinutes);
+  const finalDuration = finalMessages.length * FINAL_PHASE_MINUTES * 60 * 1000;
 
-  elements.finalTimeLabel.textContent = `${loadingMinutes} minutes`;
   setInstallState("Final");
   setStage("final");
   updateStepDots("final");
   setProgress(elements.finalProgressBar, elements.finalProgressPercent, 0);
+  elements.finalProgressStatus.textContent = finalMessages[0];
 
   runProgress({
     bar: elements.finalProgressBar,
     percentElement: elements.finalProgressPercent,
     statusElement: elements.finalProgressStatus,
-    messages: ["Starting final installation...", "Activating access...", "Verifying certificate...", "Finishing package..."],
+    messages: finalMessages,
     duration: finalDuration,
     tickMs: 1000,
     onDone: () => {
@@ -1076,7 +1128,16 @@ function renderFeatureIconMarkup(feature) {
 
 function getFinalLoadingMinutes(pkg) {
   const minutes = Number(pkg?.loadingMinutes) || Number(pkg?.loadingPreset) || MIN_FINAL_LOADING_MINUTES;
-  return Math.min(MAX_FINAL_LOADING_MINUTES, Math.max(MIN_FINAL_LOADING_MINUTES, Math.round(minutes)));
+  const roundedBlock = Math.ceil(minutes / FINAL_PHASE_MINUTES) * FINAL_PHASE_MINUTES;
+  return Math.min(MAX_FINAL_LOADING_MINUTES, Math.max(MIN_FINAL_LOADING_MINUTES, roundedBlock));
+}
+
+function getFinalPhaseMessages(loadingMinutes) {
+  const phaseCount = Math.min(
+    FINAL_PHASE_MESSAGES.length,
+    Math.max(1, Math.ceil(loadingMinutes / FINAL_PHASE_MINUTES))
+  );
+  return FINAL_PHASE_MESSAGES.slice(0, phaseCount);
 }
 
 function isLinkContact(value) {
@@ -1184,6 +1245,7 @@ elements.loginForm.addEventListener("submit", (event) => {
 elements.logoutButton.addEventListener("click", () => {
   activePackageId = null;
   clearActiveTimer();
+  clearCountdownTimer();
   elements.loginPassword.value = "";
   elements.loginView.classList.remove("hidden");
   elements.dashboardView.classList.add("hidden");

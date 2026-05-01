@@ -457,7 +457,8 @@ body.dashboard-active .feature-grid {
 
 .dashboard.install-mode .portal-hero,
 .dashboard.install-mode .portal-details,
-.dashboard.install-mode .feature-panel {
+.dashboard.install-mode .feature-panel,
+.dashboard.install-mode .subscription-panel {
   display: none;
 }
 
@@ -593,6 +594,38 @@ body.dashboard-active .feature-card {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.24);
   box-shadow: 0 0 24px rgba(255, 255, 255, 0.08);
+}
+
+.subscription-panel {
+  text-align: center;
+}
+
+.subscription-countdown {
+  margin-top: 12px;
+  padding: 16px 14px;
+  color: #ffffff;
+  background:
+    linear-gradient(135deg, rgba(26, 13, 84, 0.74), rgba(11, 18, 70, 0.56)),
+    radial-gradient(circle at 50% 0%, rgba(122, 227, 255, 0.24), transparent 62%);
+  border: 1px solid rgba(122, 227, 255, 0.28);
+  border-radius: 8px;
+  box-shadow: 0 0 30px rgba(122, 227, 255, 0.14);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: clamp(1.35rem, 7vw, 2.15rem);
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.subscription-countdown.is-expired {
+  color: #ffb4bd;
+  border-color: rgba(255, 156, 163, 0.36);
+  box-shadow: 0 0 30px rgba(255, 156, 163, 0.14);
+}
+
+.subscription-panel p {
+  margin: 10px 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 800;
 }
 
 body.dashboard-active .install-panel label,
@@ -836,6 +869,121 @@ body.dashboard-active .progress-shell {
 
 body.dashboard-active .progress-shell span {
   background: linear-gradient(90deg, #ffffff, #7ae3ff, #b56cff);
+}
+
+.final-install-stage {
+  text-align: center;
+}
+
+.final-install-header {
+  margin: 0 auto 22px;
+}
+
+.final-install-header span {
+  display: block;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.final-install-header h3 {
+  margin-top: 8px;
+  color: #ffffff;
+  font-size: clamp(2.2rem, 9vw, 4.1rem);
+  line-height: 1.02;
+  text-shadow: 0 0 28px rgba(122, 227, 255, 0.34);
+}
+
+.final-loader-card {
+  width: min(430px, 100%);
+  margin: 0 auto;
+  padding: 28px 22px 24px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(122, 227, 255, 0.18), transparent 58%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.14), rgba(10, 12, 44, 0.28));
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  box-shadow:
+    0 24px 54px rgba(11, 11, 48, 0.26),
+    0 0 44px rgba(122, 227, 255, 0.16);
+}
+
+.final-orbit {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 98px;
+  height: 98px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #ffffff, #7ae3ff, #b56cff, #ffffff);
+  animation: spin 1.4s linear infinite;
+}
+
+.final-orbit::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  background: rgba(10, 12, 44, 0.92);
+  border-radius: 50%;
+}
+
+.final-orbit span {
+  position: relative;
+  z-index: 1;
+  width: 42px;
+  height: 42px;
+  background: radial-gradient(circle, #ffffff 0 22%, #7ae3ff 24% 42%, transparent 44%);
+  border-radius: 50%;
+  box-shadow: 0 0 26px rgba(122, 227, 255, 0.56);
+}
+
+.final-loader-card .progress-status {
+  min-height: 52px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+  color: #ffffff;
+  font-size: clamp(1.05rem, 4.8vw, 1.35rem);
+  line-height: 1.28;
+  font-weight: 900;
+}
+
+.final-progress-shell {
+  height: 24px;
+  margin-bottom: 12px;
+  background: rgba(4, 7, 28, 0.48) !important;
+  border: 1px solid rgba(255, 255, 255, 0.26) !important;
+  box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.24);
+}
+
+.final-progress-shell span {
+  background: linear-gradient(90deg, #7ae3ff, #ffffff, #b56cff) !important;
+  box-shadow: 0 0 20px rgba(122, 227, 255, 0.55);
+}
+
+#finalProgressPercent {
+  display: inline-grid;
+  place-items: center;
+  min-width: 76px;
+  min-height: 40px;
+  margin-top: 2px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.final-phase-note {
+  margin: 14px 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  font-weight: 800;
 }
 
 .hyper-login {
