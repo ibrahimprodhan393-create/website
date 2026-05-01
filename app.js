@@ -696,9 +696,14 @@ function startFinalLoading() {
   });
 }
 
-function copyText(text) {
+async function copyText(text) {
   if (navigator.clipboard && window.isSecureContext) {
-    return navigator.clipboard.writeText(text);
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (error) {
+      // Some mobile browsers block clipboard after animated delays; fall back to selection copy.
+    }
   }
 
   const textarea = document.createElement("textarea");
@@ -708,9 +713,9 @@ function copyText(text) {
   textarea.style.left = "-9999px";
   document.body.appendChild(textarea);
   textarea.select();
-  document.execCommand("copy");
+  const copied = document.execCommand("copy");
   document.body.removeChild(textarea);
-  return Promise.resolve();
+  return copied;
 }
 
 function readImageFile(file) {
@@ -1212,17 +1217,18 @@ elements.contactButton.addEventListener("click", () => {
 });
 
 elements.copyActivationButton.addEventListener("click", async () => {
+  const copyPromise = copyText(elements.activationCodeOutput.value).catch(() => false);
   const ready = await runButtonLoading(elements.copyActivationButton, "Copying...");
   if (!ready) return;
 
-  copyText(elements.activationCodeOutput.value).then(() => {
-    showAnimatedElement(elements.serialForm);
-    elements.copyActivationButton.innerHTML = "<span>Copied</span>";
-    window.setTimeout(() => {
-      elements.copyActivationButton.innerHTML = elements.copyActivationButton.dataset.originalHtml || "<span>Copy Key</span>";
-    }, 1200);
-    elements.serialInput.focus();
-  });
+  const copied = await copyPromise;
+  elements.serialVerifiedPanel.classList.add("hidden");
+  showAnimatedElement(elements.serialForm);
+  elements.copyActivationButton.innerHTML = copied ? "<span>Copied</span>" : "<span>Continue</span>";
+  window.setTimeout(() => {
+    elements.copyActivationButton.innerHTML = elements.copyActivationButton.dataset.originalHtml || "<span>Copy Key</span>";
+  }, 1200);
+  elements.serialInput.focus();
 });
 
 elements.dashboardFeatures.addEventListener("click", async (event) => {
