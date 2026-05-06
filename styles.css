@@ -2566,6 +2566,406 @@ body.login-active .powered-line {
   }
 }
 
+/* Hyper Regedit white/gold login theme */
+html.login-active {
+  background: #f7f3ea;
+}
+
+body.login-active {
+  color: #15110b;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.7)),
+    url("assets/login-regedit.jpeg") center / cover no-repeat fixed;
+}
+
+body.login-active .hyper-login {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+body.login-active .hyper-login::before,
+body.login-active .hyper-login::after,
+body.login-active .circuit-rail,
+body.login-active .cyber-frame::before,
+body.login-active .cyber-frame::after {
+  display: none;
+}
+
+body.login-active .cyber-frame {
+  width: min(790px, 90vw);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+body.login-active .hyper-logo {
+  width: clamp(64px, 9dvh, 96px);
+  height: clamp(58px, 8dvh, 86px);
+  filter: drop-shadow(0 10px 20px rgba(184, 126, 35, 0.26));
+}
+
+body.login-active .hyper-logo::before {
+  border-color: #c58a31;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 0 28px rgba(197, 138, 49, 0.26);
+}
+
+body.login-active .hyper-logo::after {
+  inset: 12px;
+  border-color: rgba(197, 138, 49, 0.46);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+body.login-active .hyper-logo span {
+  color: #b77a24;
+  background: linear-gradient(180deg, #6f4718, #d3a14f 56%, #8f5f20);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 900;
+  text-shadow: none;
+}
+
+body.login-active .hyper-hero h2 {
+  color: #11100d;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-shadow: 0 4px 16px rgba(255, 255, 255, 0.84);
+}
+
+body.login-active .hyper-hero h2 span,
+body.login-active .hyper-copyright span,
+body.login-active .powered-line em,
+body.login-active .login-admin-link {
+  color: #b97d25;
+}
+
+body.login-active .hyper-hero h2 span {
+  display: block;
+  margin-top: 0.25em;
+  background: linear-gradient(180deg, #8f5f20, #d4a75b, #9c661f);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.28em;
+}
+
+body.login-active .hyper-hero p {
+  color: #15110b;
+  text-shadow: 0 2px 12px rgba(255, 255, 255, 0.9);
+}
+
+body.login-active .hyper-hero p span {
+  background: #c58a31;
+  box-shadow: 0 0 12px rgba(197, 138, 49, 0.5);
+}
+
+body.login-active .hyper-card.login-panel {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(197, 138, 49, 0.18);
+  box-shadow:
+    0 22px 48px rgba(90, 64, 27, 0.14),
+    0 0 0 1px rgba(255, 255, 255, 0.84) inset;
+  backdrop-filter: blur(10px);
+}
+
+body.login-active .lock-orb {
+  background: rgba(255, 255, 255, 0.84);
+  border-color: rgba(197, 138, 49, 0.18);
+  box-shadow:
+    0 12px 26px rgba(90, 64, 27, 0.14),
+    0 0 0 1px rgba(255, 255, 255, 0.86) inset;
+}
+
+body.login-active .lock-orb span,
+body.login-active .lock-orb span::before,
+body.login-active .input-lock,
+body.login-active .input-lock::before {
+  border-color: #c58a31;
+}
+
+body.login-active .lock-orb span::after,
+body.login-active .input-lock::after {
+  background: #c58a31;
+}
+
+body.login-active .login-intro h3,
+body.login-active .login-submit {
+  color: #11100d;
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 0.08em;
+}
+
+body.login-active .login-intro p,
+body.login-active .login-options,
+body.login-active .login-options p,
+body.login-active .hyper-copyright,
+body.login-active .login-benefits h3,
+body.login-active .powered-line {
+  color: #15110b;
+}
+
+body.login-active .password-shell {
+  background: rgba(255, 255, 255, 0.74);
+  border-color: rgba(197, 138, 49, 0.14);
+  box-shadow:
+    0 12px 24px rgba(90, 64, 27, 0.09),
+    0 0 0 1px rgba(255, 255, 255, 0.72) inset;
+}
+
+body.login-active .password-shell input {
+  color: #15110b;
+}
+
+body.login-active .password-shell input::placeholder {
+  color: rgba(21, 17, 11, 0.72);
+}
+
+body.login-active .password-toggle {
+  color: #9c661f;
+}
+
+body.login-active .remember-line input {
+  accent-color: #c58a31;
+}
+
+body.login-active .login-submit {
+  color: #11100d;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(197, 138, 49, 0.24);
+  box-shadow:
+    0 12px 24px rgba(90, 64, 27, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.82) inset;
+}
+
+body.login-active .login-submit span {
+  color: #c58a31;
+}
+
+body.login-active .secure-note {
+  display: none;
+}
+
+body.login-active .hyper-card .form-message {
+  color: #b03932;
+  text-shadow: none;
+}
+
+body.login-active .hyper-card .form-message.ok,
+body.login-active .hyper-card .form-message.neutral {
+  color: #176b36;
+}
+
+body.login-active .login-benefits article {
+  border-right-color: rgba(197, 138, 49, 0.36);
+}
+
+body.login-active .benefit-icon {
+  color: #b97d25;
+  border-color: rgba(197, 138, 49, 0.24);
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 12px 26px rgba(90, 64, 27, 0.09);
+}
+
+body.login-active .login-benefits p {
+  color: rgba(21, 17, 11, 0.66);
+}
+
+body.login-active .powered-line span {
+  background: linear-gradient(90deg, transparent, #c58a31);
+  box-shadow: 0 0 14px rgba(197, 138, 49, 0.5);
+}
+
+body.login-active .powered-line span:last-child {
+  background: linear-gradient(90deg, #c58a31, transparent);
+}
+
+/* Exact image-composed Regedit login screen */
+body.login-active {
+  background: #ffffff;
+}
+
+body.login-active .hyper-login {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+  padding: 0;
+  overflow: hidden;
+  background: url("assets/login-regedit.jpeg") center center / auto 100dvh no-repeat;
+}
+
+body.login-active .cyber-frame {
+  --regedit-art-width: calc(100dvh * 0.5625);
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: var(--regedit-art-width);
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  transform: translateX(-50%);
+}
+
+body.login-active .hyper-hero,
+body.login-active .lock-orb,
+body.login-active .login-intro,
+body.login-active .secure-note,
+body.login-active .hyper-copyright,
+body.login-active .login-benefits,
+body.login-active .powered-line {
+  display: none !important;
+}
+
+body.login-active .hyper-card.login-panel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+body.login-active #loginForm {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+body.login-active .password-shell {
+  position: absolute;
+  left: 16.2%;
+  top: 52.1%;
+  width: 67.8%;
+  height: 7.4%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+body.login-active .password-shell .input-lock,
+body.login-active .password-toggle {
+  display: none;
+}
+
+body.login-active .password-shell input {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0 10% 0 22%;
+  color: #11100d;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  font-size: clamp(1.05rem, 3.2dvh, 1.62rem);
+  font-weight: 700;
+  outline: 0;
+}
+
+body.login-active .password-shell input::placeholder {
+  color: transparent;
+}
+
+body.login-active .login-options {
+  position: absolute;
+  left: 16.5%;
+  top: 62.2%;
+  display: block;
+  width: 67%;
+  height: 8.8%;
+  margin: 0;
+}
+
+body.login-active .remember-line {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: 40%;
+  height: 36%;
+  color: transparent;
+}
+
+body.login-active .remember-line input {
+  width: 36px;
+  height: 36px;
+  min-height: 0;
+  opacity: 0;
+}
+
+body.login-active .remember-line span {
+  color: transparent;
+}
+
+body.login-active .login-options p {
+  position: absolute;
+  left: 0;
+  top: 48%;
+  width: 74%;
+  height: 34%;
+  margin: 0;
+  color: transparent;
+}
+
+body.login-active .login-admin-link {
+  position: absolute;
+  left: 47%;
+  top: 0;
+  width: 53%;
+  height: 100%;
+  padding: 0;
+  color: transparent !important;
+  background: transparent;
+  border: 0;
+}
+
+body.login-active .login-submit {
+  position: absolute;
+  left: 16.2%;
+  top: 70.1%;
+  width: 67.8%;
+  height: 7.1%;
+  min-height: 0;
+  padding: 0;
+  color: transparent;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+body.login-active .login-submit span {
+  display: none;
+}
+
+body.login-active .login-submit.is-loading::before,
+body.login-active .login-submit:focus-visible {
+  color: #b97d25;
+  outline: 2px solid rgba(197, 138, 49, 0.44);
+  outline-offset: 4px;
+}
+
+body.login-active .hyper-card .form-message {
+  position: absolute;
+  left: 13%;
+  top: 78%;
+  width: 74%;
+  min-height: 24px;
+  margin: 0;
+  color: #b03932;
+  text-align: center;
+  font-weight: 900;
+  text-shadow: 0 2px 12px rgba(255, 255, 255, 0.9);
+}
+
 @keyframes stageRise {
   from {
     opacity: 0;

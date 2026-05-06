@@ -551,7 +551,7 @@ function renderDashboard(pkg) {
 
   elements.loginView.classList.add("hidden");
   elements.dashboardView.classList.remove("hidden");
-  elements.dashboardTitle.textContent = "Welcome to the Hyper Hook Web Portal";
+  elements.dashboardTitle.textContent = "Welcome to the Hyper Regedit Web Portal";
   elements.dashboardSubtitle.textContent = `${pkg.name} access is ready. Click the button below to install.`;
   elements.packageName.textContent = pkg.name;
   elements.packageExpiry.textContent = `${getValidityDays(pkg)} day(s), ${formatDate(pkg.expiresAt)}`;
@@ -1218,7 +1218,7 @@ elements.loginForm.addEventListener("submit", (event) => {
   const password = elements.loginPassword.value.trim();
   const adminPassword = (appData.settings?.adminPassword || DEFAULT_ADMIN_PASSWORD).trim();
 
-  if (password === adminPassword || password === DEFAULT_ADMIN_PASSWORD) {
+  if (password === adminPassword) {
     adminAuthenticated = true;
     activePackageId = null;
     elements.loginPassword.value = "";

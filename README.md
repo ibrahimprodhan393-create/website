@@ -10,6 +10,7 @@ Sample login keys:
 - `KEY-30DAY-2026`
 
 The admin panel stores packages and features in browser `localStorage`.
+To change the admin password, log in with the current admin password, open Admin Account, edit Admin Panel Password, then click Save Admin Settings. After saving, the old default password no longer works unless you set it again.
 Use the same home login password box for admin and users. The Contact Admin button uses the selected contact saved in Admin Account settings.
 After user login, the portal shows admin-controlled device details, legal/regulatory details, package details, clickable feature activation toggles, and the install flow with a new random web activation code on every install.
 Feature toggles are optional and default to deactivated. Toggle actions show animated activate/deactivate success messages.
@@ -17,3 +18,4 @@ The install stage opens as its own focused screen without numbered step boxes. C
 Final installation loading hides the minute label on the user screen, shows a large animated final installation view, and runs 10-minute checking phases until the admin package loading time is complete.
 The user dashboard includes a live reverse subscription countdown until package expiry.
 The dashboard also includes Free Fire and Free Fire Max injection buttons above the live countdown.
+The login screen uses an exact image-composed Hyper Regedit Access layout from `assets/login-regedit.jpeg`, with functional invisible input/button hit areas aligned on top of the image. A cache-busted stylesheet URL and inline critical login CSS are included so browsers do not keep the older purple login UI.
