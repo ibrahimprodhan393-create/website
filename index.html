@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Access Activation Console</title>
-    <link rel="stylesheet" href="styles.css?v=login-bottom-lock-20260507">
+    <link rel="stylesheet" href="styles.css?v=login-card-center-20260507">
     <style>
       html.login-active,
       body.login-active {
@@ -1254,6 +1254,80 @@
           margin: 0 auto !important;
           font-size: 0.58rem !important;
           line-height: 1 !important;
+        }
+      }
+    </style>
+    <style id="login-card-center-spacing">
+      @media (max-width: 640px) {
+        body.login-active .hyper-login {
+          grid-template-rows: minmax(0, 1fr) auto auto auto !important;
+          align-content: stretch !important;
+          gap: 5px !important;
+        }
+
+        body.login-active .cyber-frame {
+          align-self: center !important;
+          display: grid !important;
+          align-content: center !important;
+          min-height: min(74svh, 610px) !important;
+        }
+
+        body.login-active .hyper-hero {
+          margin-bottom: clamp(12px, 2.2svh, 20px) !important;
+        }
+
+        body.login-active .hyper-card.login-panel {
+          margin-top: clamp(8px, 1.5svh, 16px) !important;
+          padding-top: clamp(22px, 3svh, 30px) !important;
+          padding-bottom: clamp(14px, 2svh, 18px) !important;
+        }
+
+        body.login-active .password-shell {
+          margin-bottom: 11px !important;
+        }
+
+        body.login-active .login-options {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: stretch !important;
+          justify-content: flex-start !important;
+          gap: 11px !important;
+          margin: 0 0 12px !important;
+          text-align: left !important;
+        }
+
+        body.login-active .remember-line {
+          align-self: flex-start !important;
+          margin-left: 2px !important;
+          gap: 8px !important;
+        }
+
+        body.login-active .login-options p {
+          align-self: center !important;
+          width: 100% !important;
+          margin: 0 !important;
+          text-align: center !important;
+        }
+
+        body.login-active .login-submit {
+          margin-top: 2px !important;
+        }
+      }
+
+      @media (max-width: 380px), (max-height: 720px) {
+        body.login-active .cyber-frame {
+          min-height: min(72svh, 560px) !important;
+        }
+
+        body.login-active .hyper-card.login-panel {
+          margin-top: 8px !important;
+          padding-top: 20px !important;
+          padding-bottom: 12px !important;
+        }
+
+        body.login-active .login-options {
+          gap: 9px !important;
+          margin-bottom: 10px !important;
         }
       }
     </style>
