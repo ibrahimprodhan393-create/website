@@ -205,8 +205,10 @@
       body.login-active {
         color: #15110b !important;
         background:
-          linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.84)),
-          url("assets/login-regedit.jpeg") center / cover no-repeat fixed !important;
+          radial-gradient(circle at 50% 9%, rgba(219, 175, 91, 0.2), transparent 18%),
+          radial-gradient(circle at 16% 20%, rgba(197, 138, 49, 0.12), transparent 22%),
+          radial-gradient(circle at 84% 24%, rgba(197, 138, 49, 0.1), transparent 20%),
+          linear-gradient(180deg, #fffdf7 0%, #f8f3ea 48%, #fffaf1 100%) !important;
       }
 
       body.login-active .login-regedit-art {
@@ -637,7 +639,6 @@
       <main>
         <section class="view active" id="userView">
           <div class="login-layout hyper-login" id="loginView">
-            <img class="login-regedit-art" src="assets/login-regedit.jpeg" alt="" aria-hidden="true">
             <div class="cyber-frame">
               <span class="circuit-rail rail-left" aria-hidden="true"></span>
               <span class="circuit-rail rail-right" aria-hidden="true"></span>

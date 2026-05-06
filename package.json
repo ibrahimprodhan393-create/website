@@ -1,0 +1,13 @@
+{
+  "name": "hyper-regedit-access",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hyper Regedit access activation portal with admin-managed packages and one-device package locking.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

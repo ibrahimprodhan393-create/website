@@ -1,6 +1,6 @@
 services:
   - type: web
     name: hyper-hook-access
-    runtime: static
-    buildCommand: echo "No build step required"
-    staticPublishPath: .
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start

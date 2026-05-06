@@ -1,4 +1,6 @@
 const STORAGE_KEY = "activationAccessData.v1";
+const DEVICE_ID_KEY = "activationAccessDeviceId.v1";
+const ADMIN_TOKEN_KEY = "activationAdminToken.v1";
 const DEFAULT_ADMIN_PASSWORD = "ADMIN-2026";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SERIAL_INSTALL_DURATION_MS = 2 * 60 * 1000;
@@ -21,11 +23,15 @@ const FINAL_PHASE_MESSAGES = [
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
+const deviceId = getOrCreateDeviceId();
 let appData = loadData();
 let activePackageId = null;
 let activeTimer = null;
 let countdownTimer = null;
 let adminAuthenticated = false;
+let adminToken = sessionStorage.getItem(ADMIN_TOKEN_KEY) || "";
+let backendOnline = false;
+let saveQueue = Promise.resolve();
 
 const elements = {
   userView: $("#userView"),
@@ -269,6 +275,20 @@ function seedData() {
   };
 }
 
+function getOrCreateDeviceId() {
+  try {
+    const existing = localStorage.getItem(DEVICE_ID_KEY);
+    if (existing) return existing;
+    const id =
+      window.crypto?.randomUUID?.() ||
+      `dev_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 12)}`;
+    localStorage.setItem(DEVICE_ID_KEY, id);
+    return id;
+  } catch (error) {
+    return `dev_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 12)}`;
+  }
+}
+
 function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -305,6 +325,144 @@ function normalizeData(data) {
 
 function saveData() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+  if (adminAuthenticated && adminToken) {
+    queueAdminSave();
+  }
+}
+
+async function apiRequest(path, { method = "GET", body, token = adminToken } = {}) {
+  const headers = {
+    Accept: "application/json"
+  };
+
+  if (body !== undefined) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(path, {
+    method,
+    headers,
+    body: body === undefined ? undefined : JSON.stringify(body)
+  });
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const error = new Error(payload.message || "Server request failed");
+    error.status = response.status;
+    error.payload = payload;
+    throw error;
+  }
+
+  backendOnline = true;
+  return payload;
+}
+
+function queueAdminSave() {
+  const snapshot = normalizeData(appData);
+  saveQueue = saveQueue
+    .then(() =>
+      apiRequest("/api/admin/data", {
+        method: "PUT",
+        body: { data: snapshot },
+        token: adminToken
+      })
+    )
+    .catch((error) => {
+      if (error.status === 401) {
+        adminToken = "";
+        sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+      }
+      console.warn("Admin data sync failed:", error.message);
+    });
+  return saveQueue;
+}
+
+async function loadPublicSettings() {
+  try {
+    const payload = await apiRequest("/api/public");
+    if (payload.settings) {
+      appData.settings = {
+        ...appData.settings,
+        ...payload.settings
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    }
+  } catch (error) {
+    backendOnline = false;
+  }
+}
+
+function mergeActivePackage(pkg) {
+  appData.packages = [
+    ...appData.packages.filter((item) => item.id !== pkg.id),
+    pkg
+  ];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+}
+
+async function loginWithServer(password) {
+  try {
+    const payload = await apiRequest("/api/login", {
+      method: "POST",
+      body: { password, deviceId }
+    });
+
+    if (payload.role === "admin") {
+      adminToken = payload.token || "";
+      sessionStorage.setItem(ADMIN_TOKEN_KEY, adminToken);
+      appData = normalizeData(payload.data || seedData());
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+      adminAuthenticated = true;
+      activePackageId = null;
+      elements.loginPassword.value = "";
+      elements.loginView.classList.remove("hidden");
+      elements.dashboardView.classList.add("hidden");
+      setMessage(elements.loginMessage, "");
+      renderAdmin();
+      setView("admin");
+      return true;
+    }
+
+    if (payload.role === "user" && payload.package) {
+      const pkg = normalizeData({ ...appData, packages: [payload.package] }).packages[0];
+      activePackageId = pkg.id;
+      mergeActivePackage(pkg);
+      setMessage(elements.loginMessage, "");
+      renderDashboard(pkg);
+      return true;
+    }
+  } catch (error) {
+    if (error.status) {
+      setMessage(elements.loginMessage, error.message || "Login failed");
+      return true;
+    }
+    backendOnline = false;
+  }
+
+  return false;
+}
+
+async function verifyServerAccess(path, body, messageElement, fallbackMessage) {
+  try {
+    await apiRequest(path, {
+      method: "POST",
+      body: {
+        ...body,
+        deviceId
+      }
+    });
+    return true;
+  } catch (error) {
+    if (error.status) {
+      setMessage(messageElement, error.message || fallbackMessage);
+      return false;
+    }
+    return null;
+  }
 }
 
 function makeId(prefix) {
@@ -864,6 +1022,7 @@ function renderPackageList() {
     .map((pkg) => {
       const status = isExpired(pkg) ? "Expired" : pkg.status;
       const featureTotal = pkg.featureIds.length;
+      const lockStatus = pkg.deviceLockId ? "Device: Locked" : "Device: Unused";
       return `
         <article class="access-row">
           <div>
@@ -873,12 +1032,16 @@ function renderPackageList() {
               <span>${status}</span>
               <span>${getValidityDays(pkg)} day(s)</span>
               <span>${featureTotal} feature(s)</span>
+              <span>${lockStatus}</span>
               <span>Web: ${escapeHtml(pkg.webAccessCode)}</span>
               <span>Cert: ${escapeHtml(pkg.certificateCode)}</span>
             </div>
           </div>
           <div class="list-actions">
             <button type="button" data-package-action="edit" data-package-id="${pkg.id}">Edit</button>
+            <button type="button" data-package-action="unlock" data-package-id="${pkg.id}" ${pkg.deviceLockId ? "" : "disabled"}>
+              Reset Device Lock
+            </button>
             <button type="button" data-package-action="toggle" data-package-id="${pkg.id}">
               ${pkg.status === "Active" ? "Disable" : "Enable"}
             </button>
@@ -1011,7 +1174,9 @@ function savePackageFromForm(event) {
     loadingPreset,
     loadingMinutes,
     finalMessage: elements.pkgFinalMessage.value.trim(),
-    featureIds
+    featureIds,
+    deviceLockId: existing?.deviceLockId || "",
+    deviceLockedAt: existing?.deviceLockedAt || null
   };
 
   if (existing) {
@@ -1213,9 +1378,12 @@ elements.togglePasswordButton.addEventListener("click", () => {
 
 elements.contactAdminLoginButton.addEventListener("click", openSelectedAdminContact);
 
-elements.loginForm.addEventListener("submit", (event) => {
+elements.loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const password = elements.loginPassword.value.trim();
+  const handledByServer = await loginWithServer(password);
+  if (handledByServer) return;
+
   const adminPassword = (appData.settings?.adminPassword || DEFAULT_ADMIN_PASSWORD).trim();
 
   if (password === adminPassword) {
@@ -1344,6 +1512,23 @@ elements.serialForm.addEventListener("submit", async (event) => {
 
   const pkg = getActivePackage();
   const serial = elements.serialInput.value.trim();
+  const serverResult = await verifyServerAccess(
+    "/api/verify-serial",
+    { packageId: pkg?.id, serial },
+    elements.serialMessage,
+    "Incorrect Device Serial Number"
+  );
+
+  if (serverResult === false) {
+    elements.serialVerifiedPanel.classList.add("hidden");
+    return;
+  }
+
+  if (serverResult === true) {
+    setMessage(elements.serialMessage, "");
+    showAnimatedElement(elements.serialVerifiedPanel);
+    return;
+  }
 
   if (!pkg || serial !== pkg.deviceSerial) {
     setMessage(elements.serialMessage, "Incorrect Device Serial Number");
@@ -1367,6 +1552,21 @@ elements.webCodeForm.addEventListener("submit", async (event) => {
 
   const pkg = getActivePackage();
   const webCode = elements.webCodeInput.value.trim();
+  const serverResult = await verifyServerAccess(
+    "/api/verify-web-code",
+    { packageId: pkg?.id, code: webCode },
+    elements.webCodeMessage,
+    "Invalid Web Access Activation Code"
+  );
+
+  if (serverResult === false) return;
+
+  if (serverResult === true) {
+    setMessage(elements.webCodeMessage, "");
+    setInstallState("Certificate");
+    setStage("cert");
+    return;
+  }
 
   if (!pkg || webCode !== pkg.webAccessCode) {
     setMessage(elements.webCodeMessage, "Invalid Web Access Activation Code");
@@ -1385,6 +1585,20 @@ elements.certificateForm.addEventListener("submit", async (event) => {
 
   const pkg = getActivePackage();
   const certificate = elements.certificateInput.value.trim();
+  const serverResult = await verifyServerAccess(
+    "/api/verify-certificate",
+    { packageId: pkg?.id, code: certificate },
+    elements.certificateMessage,
+    "Incorrect Access Certificate Code"
+  );
+
+  if (serverResult === false) return;
+
+  if (serverResult === true) {
+    setMessage(elements.certificateMessage, "");
+    startFinalLoading();
+    return;
+  }
 
   if (!pkg || certificate !== pkg.certificateCode) {
     setMessage(elements.certificateMessage, "Incorrect Access Certificate Code");
@@ -1453,6 +1667,14 @@ elements.packageList.addEventListener("click", (event) => {
     if (activePackageId === pkg.id) renderDashboard(pkg);
   }
 
+  if (button.dataset.packageAction === "unlock") {
+    if (!window.confirm("Reset the saved device for this package?")) return;
+    pkg.deviceLockId = "";
+    pkg.deviceLockedAt = null;
+    saveData();
+    renderPackageList();
+  }
+
   if (button.dataset.packageAction === "delete") {
     if (!window.confirm("Delete this access package?")) return;
     appData.packages = appData.packages.filter((item) => item.id !== pkg.id);
@@ -1480,7 +1702,13 @@ elements.resetDemoButton.addEventListener("click", () => {
   renderAdmin();
 });
 
-resetPackageForm();
-resetFeatureForm();
-renderAdmin();
-updatePageMode();
+async function initializeApp() {
+  resetPackageForm();
+  resetFeatureForm();
+  renderAdmin();
+  updatePageMode();
+  await loadPublicSettings();
+  renderAdminSettings();
+}
+
+initializeApp();
