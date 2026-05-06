@@ -29,11 +29,21 @@ The user dashboard includes a live reverse subscription countdown until package 
 The dashboard also includes Free Fire and Free Fire Max injection buttons above the live countdown.
 The login screen is built with HTML/CSS as a Hyper Regedit Access white/gold interface. It does not require a separate login image asset, so password input, remember, contact, and login controls remain real clickable form elements.
 
+Neon setup:
+
+1. Open Neon SQL Editor.
+2. Run the SQL from `neon-schema.sql`.
+3. Copy your Neon pooled connection string.
+4. Add it in Render Environment as `DATABASE_URL`.
+
+No website file is uploaded to Neon. Neon only needs the SQL schema and the `DATABASE_URL` connection string.
+
 Render deploy:
 
 - Service type: Web Service
 - Runtime: Node
 - Build command: `npm install`
 - Start command: `npm start`
+- Environment variable: `DATABASE_URL` = your Neon pooled connection string
 
-The server writes shared data to `data/store.json`. For long-term production persistence, connect a database later; this file-based store is a lightweight Render-ready version for the current package flow.
+When `DATABASE_URL` is set, the server stores shared admin data, packages, features, and device locks in Neon. If `DATABASE_URL` is not set, it falls back to `data/store.json`, which is not recommended for permanent Render hosting.

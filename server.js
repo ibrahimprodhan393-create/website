@@ -6,12 +6,27 @@ const crypto = require("crypto");
 const PORT = Number(process.env.PORT) || 3000;
 const ROOT_DIR = __dirname;
 const DATA_FILE = process.env.DATA_FILE || path.join(ROOT_DIR, "data", "store.json");
+const DATABASE_URL = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.NEON_DATABASE_URL || "";
+const STORE_ID = "main";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "ADMIN-2026";
 const ADMIN_SESSION_MS = 12 * 60 * 60 * 1000;
 
 const sessions = new Map();
 let writeQueue = Promise.resolve();
+let dbPool = null;
+let dbReady = false;
+
+if (DATABASE_URL) {
+  const { Pool } = require("pg");
+  dbPool = new Pool({
+    connectionString: DATABASE_URL,
+    ssl: DATABASE_URL.includes("sslmode=disable") ? false : { rejectUnauthorized: false },
+    max: 5,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000
+  });
+}
 
 function seedData() {
   const now = Date.now();
@@ -183,6 +198,22 @@ function normalizeData(data = {}) {
 }
 
 async function readStore() {
+  if (dbPool) {
+    try {
+      await ensureDatabaseStore();
+      const result = await dbPool.query("select data from app_store where id = $1", [STORE_ID]);
+      if (result.rows[0]?.data) {
+        return normalizeData(result.rows[0].data);
+      }
+
+      const seeded = normalizeData(seedData());
+      await writeStore(seeded);
+      return seeded;
+    } catch (error) {
+      console.error("Neon read failed, falling back to file storage:", error.message);
+    }
+  }
+
   try {
     const raw = await fs.readFile(DATA_FILE, "utf8");
     return normalizeData(JSON.parse(raw));
@@ -194,8 +225,38 @@ async function readStore() {
 }
 
 async function writeStore(data) {
+  const normalized = normalizeData(data);
+
+  if (dbPool) {
+    try {
+      await ensureDatabaseStore();
+      await dbPool.query(
+        `insert into app_store (id, data, updated_at)
+         values ($1, $2::jsonb, now())
+         on conflict (id)
+         do update set data = excluded.data, updated_at = now()`,
+        [STORE_ID, JSON.stringify(normalized)]
+      );
+      return;
+    } catch (error) {
+      console.error("Neon write failed, falling back to file storage:", error.message);
+    }
+  }
+
   await fs.mkdir(path.dirname(DATA_FILE), { recursive: true });
-  await fs.writeFile(DATA_FILE, JSON.stringify(normalizeData(data), null, 2));
+  await fs.writeFile(DATA_FILE, JSON.stringify(normalized, null, 2));
+}
+
+async function ensureDatabaseStore() {
+  if (!dbPool || dbReady) return;
+  await dbPool.query(`
+    create table if not exists app_store (
+      id text primary key,
+      data jsonb not null,
+      updated_at timestamptz not null default now()
+    )
+  `);
+  dbReady = true;
 }
 
 function withStoreUpdate(mutator) {
