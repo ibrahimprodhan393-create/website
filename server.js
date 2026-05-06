@@ -17,11 +17,24 @@ let writeQueue = Promise.resolve();
 let dbPool = null;
 let dbReady = false;
 
+function getDatabaseConfig(connectionString) {
+  const parsed = new URL(connectionString);
+  const sslMode = parsed.searchParams.get("sslmode");
+  const channelBinding = parsed.searchParams.get("channel_binding");
+  parsed.searchParams.delete("sslmode");
+  parsed.searchParams.delete("channel_binding");
+
+  return {
+    connectionString: parsed.toString(),
+    ssl: sslMode === "disable" ? false : { rejectUnauthorized: true },
+    ...(channelBinding ? { enableChannelBinding: channelBinding === "require" } : {})
+  };
+}
+
 if (DATABASE_URL) {
   const { Pool } = require("pg");
   dbPool = new Pool({
-    connectionString: DATABASE_URL,
-    ssl: DATABASE_URL.includes("sslmode=disable") ? false : { rejectUnauthorized: false },
+    ...getDatabaseConfig(DATABASE_URL),
     max: 5,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000

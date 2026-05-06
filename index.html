@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Access Activation Console</title>
-    <link rel="stylesheet" href="styles.css?v=mobile-icons-20260507">
+    <link rel="stylesheet" href="styles.css?v=mobile-polish-20260507">
     <style>
       html.login-active,
       body.login-active {
@@ -617,6 +617,400 @@
 
       body.login-active .powered-line em {
         color: #15110b !important;
+      }
+    </style>
+    <style id="mobile-login-polish">
+      @media (max-width: 640px) {
+        html.login-active,
+        body.login-active {
+          height: 100svh !important;
+          min-height: 100svh !important;
+          overflow: hidden !important;
+        }
+
+        body.login-active .app-shell,
+        body.login-active main,
+        body.login-active #userView.active,
+        body.login-active #loginView {
+          width: 100% !important;
+          height: 100svh !important;
+          min-height: 100svh !important;
+        }
+
+        body.login-active .hyper-login {
+          display: grid !important;
+          grid-template-rows: auto auto auto !important;
+          align-content: center !important;
+          justify-content: center !important;
+          gap: 5px !important;
+          padding: 5px 8px 6px !important;
+          overflow: hidden !important;
+        }
+
+        body.login-active .cyber-frame {
+          display: block !important;
+          width: min(100%, 390px) !important;
+          max-height: none !important;
+          padding: 5px 8px 6px !important;
+          border-radius: 30px !important;
+          background: rgba(255, 255, 255, 0.54) !important;
+          box-shadow: 0 12px 34px rgba(90, 64, 27, 0.1) !important;
+        }
+
+        body.login-active .hyper-hero {
+          margin: 0 0 18px !important;
+        }
+
+        body.login-active .hyper-logo {
+          width: 46px !important;
+          height: 41px !important;
+          margin: 0 0 6px !important;
+          filter: drop-shadow(0 6px 12px rgba(184, 126, 35, 0.2)) !important;
+        }
+
+        body.login-active .hyper-logo::before {
+          border-width: 3px !important;
+        }
+
+        body.login-active .hyper-logo::after {
+          inset: 7px !important;
+          border-width: 2px !important;
+        }
+
+        body.login-active .hyper-logo span {
+          font-size: 1.55rem !important;
+          line-height: 1 !important;
+        }
+
+        body.login-active .hyper-hero h2 {
+          max-width: 330px !important;
+          margin: 0 auto !important;
+          font-size: clamp(1.8rem, 8.4vw, 2.25rem) !important;
+          line-height: 1.02 !important;
+          letter-spacing: 0.12em !important;
+        }
+
+        body.login-active .hyper-hero h2 span {
+          margin-top: 0.16em !important;
+          letter-spacing: 0.24em !important;
+        }
+
+        body.login-active .hyper-hero p {
+          gap: 7px !important;
+          margin-top: 7px !important;
+          font-size: 0.72rem !important;
+          line-height: 1 !important;
+          letter-spacing: 0.12em !important;
+          white-space: nowrap !important;
+        }
+
+        body.login-active .hyper-hero p span {
+          width: 4px !important;
+          height: 4px !important;
+        }
+
+        body.login-active .hyper-card.login-panel {
+          width: min(100%, 360px) !important;
+          padding: 34px 16px 12px !important;
+          border-radius: 34px !important;
+          box-shadow: 0 14px 34px rgba(90, 64, 27, 0.11) !important;
+        }
+
+        body.login-active .lock-orb {
+          top: -24px !important;
+          width: 48px !important;
+          height: 48px !important;
+          border-width: 1px !important;
+          box-shadow: 0 8px 18px rgba(90, 64, 27, 0.12) !important;
+        }
+
+        body.login-active .lock-orb span {
+          width: 15px !important;
+          height: 14px !important;
+          border-width: 2px !important;
+          border-radius: 3px !important;
+        }
+
+        body.login-active .lock-orb span::before {
+          width: 14px !important;
+          height: 14px !important;
+          bottom: 9px !important;
+          border-width: 2px !important;
+        }
+
+        body.login-active .lock-orb span::after {
+          top: 5px !important;
+          width: 3px !important;
+          height: 6px !important;
+        }
+
+        body.login-active .login-intro h3 {
+          margin: 0 0 7px !important;
+          font-size: 1.3rem !important;
+          line-height: 1.05 !important;
+        }
+
+        body.login-active .login-intro p {
+          margin: 0 0 10px !important;
+          font-size: 0.84rem !important;
+          line-height: 1.2 !important;
+        }
+
+        body.login-active .password-shell {
+          grid-template-columns: 24px minmax(0, 1fr) 38px !important;
+          gap: 8px !important;
+          min-height: 44px !important;
+          margin: 0 0 8px !important;
+          padding: 0 12px !important;
+          border-radius: 999px !important;
+        }
+
+        body.login-active .password-shell .input-lock,
+        body.login-active .input-lock {
+          display: inline-block !important;
+          width: 15px !important;
+          height: 14px !important;
+          min-width: 15px !important;
+          border-width: 2px !important;
+          border-radius: 3px !important;
+        }
+
+        body.login-active .input-lock::before {
+          width: 14px !important;
+          height: 14px !important;
+          bottom: 9px !important;
+          border-width: 2px !important;
+        }
+
+        body.login-active .password-shell input {
+          min-height: 42px !important;
+          font-size: 0.82rem !important;
+          line-height: 1 !important;
+          font-weight: 700 !important;
+        }
+
+        body.login-active .password-toggle {
+          min-height: 32px !important;
+          padding: 0 !important;
+          font-size: 0.62rem !important;
+          line-height: 1 !important;
+        }
+
+        body.login-active .login-options {
+          flex-direction: column !important;
+          justify-content: center !important;
+          gap: 5px !important;
+          margin: 0 0 9px !important;
+          font-size: 0.82rem !important;
+          line-height: 1.15 !important;
+          text-align: center !important;
+        }
+
+        body.login-active .remember-line {
+          gap: 7px !important;
+        }
+
+        body.login-active .remember-line input {
+          width: 18px !important;
+          height: 18px !important;
+          min-height: 18px !important;
+          margin: 0 !important;
+        }
+
+        body.login-active .login-submit {
+          min-height: 44px !important;
+          padding: 0 16px !important;
+          gap: 12px !important;
+          font-size: 1rem !important;
+        }
+
+        body.login-active .login-submit span {
+          font-size: 1.35rem !important;
+          line-height: 1 !important;
+        }
+
+        body.login-active .hyper-card .form-message {
+          min-height: 15px !important;
+          margin: 5px 0 0 !important;
+          font-size: 0.76rem !important;
+          line-height: 1.15 !important;
+        }
+
+        body.login-active .hyper-copyright {
+          width: min(100%, 390px) !important;
+          margin: 5px auto 5px !important;
+          padding: 0 8px !important;
+          font-size: 0.65rem !important;
+          line-height: 1.2 !important;
+        }
+
+        body.login-active .login-benefits {
+          width: min(100%, 390px) !important;
+          min-height: 74px !important;
+          margin: 0 auto !important;
+          align-items: start !important;
+        }
+
+        body.login-active .login-benefits article {
+          grid-template-rows: 30px 24px 28px !important;
+          align-items: start !important;
+          justify-items: center !important;
+          gap: 2px !important;
+          min-height: 74px !important;
+          padding: 0 4px !important;
+        }
+
+        body.login-active .login-benefits .benefit-icon {
+          width: 28px !important;
+          min-width: 28px !important;
+          height: 28px !important;
+          min-height: 28px !important;
+          margin: 0 auto !important;
+          border-width: 1px !important;
+          border-radius: 50% !important;
+          font-size: 0.68rem !important;
+          line-height: 1 !important;
+          box-shadow: 0 5px 10px rgba(90, 64, 27, 0.08) !important;
+        }
+
+        body.login-active .login-benefits .benefit-icon.shield-mark::before {
+          inset: 7px 8px 6px !important;
+          border-width: 2px !important;
+        }
+
+        body.login-active .login-benefits .benefit-icon.shield-mark::after {
+          width: 7px !important;
+          height: 4px !important;
+          border-left-width: 2px !important;
+          border-bottom-width: 2px !important;
+          transform: rotate(-45deg) translate(-1px, -1px) !important;
+        }
+
+        body.login-active .login-benefits .bolt-mark,
+        body.login-active .login-benefits .support-mark {
+          font-size: 0.66rem !important;
+          font-weight: 900 !important;
+        }
+
+        body.login-active .login-benefits h3 {
+          margin: 0 !important;
+          font-size: 0.59rem !important;
+          line-height: 1.08 !important;
+          min-height: 18px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          text-align: center !important;
+        }
+
+        body.login-active .login-benefits p {
+          margin: 0 !important;
+          font-size: 0.56rem !important;
+          line-height: 1.12 !important;
+          text-align: center !important;
+        }
+
+        body.login-active .powered-line {
+          width: min(100%, 390px) !important;
+          grid-template-columns: 38px auto 38px !important;
+          gap: 7px !important;
+          margin: 2px auto 0 !important;
+          font-size: 0.64rem !important;
+          line-height: 1 !important;
+          letter-spacing: 0.09em !important;
+        }
+      }
+
+      @media (max-width: 380px), (max-height: 720px) {
+        body.login-active .hyper-login {
+          gap: 3px !important;
+          padding-top: 3px !important;
+          padding-bottom: 4px !important;
+        }
+
+        body.login-active .cyber-frame {
+          width: min(100%, 360px) !important;
+          padding: 4px 7px 5px !important;
+        }
+
+        body.login-active .hyper-logo {
+          width: 40px !important;
+          height: 36px !important;
+          margin-bottom: 4px !important;
+        }
+
+        body.login-active .hyper-logo span {
+          font-size: 1.35rem !important;
+        }
+
+        body.login-active .hyper-hero {
+          margin-bottom: 15px !important;
+        }
+
+        body.login-active .hyper-hero h2 {
+          font-size: clamp(1.55rem, 7.8vw, 1.95rem) !important;
+        }
+
+        body.login-active .hyper-hero p {
+          margin-top: 5px !important;
+          font-size: 0.64rem !important;
+        }
+
+        body.login-active .hyper-card.login-panel {
+          width: min(100%, 340px) !important;
+          padding: 30px 13px 10px !important;
+        }
+
+        body.login-active .login-intro h3 {
+          font-size: 1.12rem !important;
+        }
+
+        body.login-active .login-intro p {
+          margin-bottom: 8px !important;
+          font-size: 0.76rem !important;
+        }
+
+        body.login-active .password-shell {
+          min-height: 40px !important;
+          margin-bottom: 7px !important;
+        }
+
+        body.login-active .password-shell input {
+          min-height: 38px !important;
+          font-size: 0.76rem !important;
+        }
+
+        body.login-active .login-submit {
+          min-height: 40px !important;
+        }
+
+        body.login-active .login-benefits {
+          min-height: 68px !important;
+        }
+
+        body.login-active .login-benefits article {
+          grid-template-rows: 27px 21px 24px !important;
+          min-height: 68px !important;
+        }
+
+        body.login-active .login-benefits .benefit-icon {
+          width: 25px !important;
+          min-width: 25px !important;
+          height: 25px !important;
+          min-height: 25px !important;
+        }
+
+        body.login-active .login-benefits h3 {
+          font-size: 0.53rem !important;
+        }
+
+        body.login-active .login-benefits p {
+          font-size: 0.5rem !important;
+        }
+
+        body.login-active .powered-line {
+          font-size: 0.58rem !important;
+        }
       }
     </style>
   </head>
