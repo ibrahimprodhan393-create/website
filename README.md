@@ -1,14 +1,19 @@
-# Access Activation Website
+# Hyper Regedit Access Website
 
-Run this as a Node web service so admin-created packages are shared for every user.
+This ZIP is prepared for Render Static Site deployment.
 
-Local start:
+Render settings:
 
-```bash
-npm start
-```
+- Service type: Static Site
+- Build command: `echo "No build step required"`
+- Publish directory: `.`
 
-Then open `http://localhost:3000`.
+Files needed for static hosting:
+
+- `index.html`
+- `styles.css`
+- `app.js`
+- `render.yaml`
 
 Sample login keys:
 
@@ -17,33 +22,8 @@ Sample login keys:
 - `KEY-7DAY-2026`
 - `KEY-30DAY-2026`
 
-The admin panel stores packages and features on the server. A package password is locked to the first browser/device ID that logs in successfully. The same device can keep using that package password, but another device receives `Already used on another device`.
-Admin can clear a package device lock from Package Management with `Reset Device Lock`.
-To change the admin password, log in with the current admin password, open Admin Account, edit Admin Panel Password, then click Save Admin Settings. After saving, the old default password no longer works unless you set it again.
-Use the same home login password box for admin and users. The Contact Admin button uses the selected contact saved in Admin Account settings.
-After user login, the portal shows admin-controlled device details, legal/regulatory details, package details, clickable feature activation toggles, and the install flow with a new random web activation code on every install.
-Feature toggles are optional and default to deactivated. Toggle actions show animated activate/deactivate success messages.
-The install stage opens as its own focused screen without numbered step boxes. Copy Key reveals the serial form, a correct serial shows the registered service/security module message and an Install button, then the firmware/file installation loading page runs for 2 minutes before asking for the package web activation code.
-Final installation loading hides the minute label on the user screen, shows a large animated final installation view, and runs 10-minute checking phases until the admin package loading time is complete.
-The user dashboard includes a live reverse subscription countdown until package expiry.
-The dashboard also includes Free Fire and Free Fire Max injection buttons above the live countdown.
+Static-site note:
+
+The UI and flow stay the same, but static hosting stores admin packages/features in the current browser `localStorage`. That means package data created on one phone/browser is not shared automatically to other phones. Shared package login, Neon storage, and one-device locking across all users require the Node Web Service version.
+
 The login screen is built with HTML/CSS as a Hyper Regedit Access white/gold interface. It does not require a separate login image asset, so password input, remember, contact, and login controls remain real clickable form elements.
-
-Neon setup:
-
-1. Open Neon SQL Editor.
-2. Run the SQL from `neon-schema.sql`.
-3. Copy your Neon pooled connection string.
-4. Add it in Render Environment as `DATABASE_URL`.
-
-No website file is uploaded to Neon. Neon only needs the SQL schema and the `DATABASE_URL` connection string.
-
-Render deploy:
-
-- Service type: Web Service
-- Runtime: Node
-- Build command: `npm install`
-- Start command: `npm start`
-- Environment variable: `DATABASE_URL` = your Neon pooled connection string
-
-When `DATABASE_URL` is set, the server stores shared admin data, packages, features, and device locks in Neon. If `DATABASE_URL` is not set, it falls back to `data/store.json`, which is not recommended for permanent Render hosting.

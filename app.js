@@ -348,7 +348,16 @@ async function apiRequest(path, { method = "GET", body, token = adminToken } = {
     headers,
     body: body === undefined ? undefined : JSON.stringify(body)
   });
-  const payload = await response.json().catch(() => ({}));
+  const contentType = response.headers.get("content-type") || "";
+  const isJson = contentType.toLowerCase().includes("application/json");
+  const payload = isJson ? await response.json().catch(() => ({})) : {};
+
+  if (!isJson) {
+    const error = new Error("API unavailable");
+    error.status = response.status === 200 ? 404 : response.status;
+    error.payload = payload;
+    throw error;
+  }
 
   if (!response.ok) {
     const error = new Error(payload.message || "Server request failed");
@@ -381,6 +390,10 @@ function queueAdminSave() {
   return saveQueue;
 }
 
+function isMissingApiError(error) {
+  return error?.status === 404 || error?.status === 405;
+}
+
 async function loadPublicSettings() {
   try {
     const payload = await apiRequest("/api/public");
@@ -392,6 +405,10 @@ async function loadPublicSettings() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
     }
   } catch (error) {
+    if (isMissingApiError(error)) {
+      backendOnline = false;
+      return;
+    }
     backendOnline = false;
   }
 }
@@ -436,6 +453,11 @@ async function loginWithServer(password) {
       return true;
     }
   } catch (error) {
+    if (isMissingApiError(error)) {
+      backendOnline = false;
+      return false;
+    }
+
     if (error.status) {
       setMessage(elements.loginMessage, error.message || "Login failed");
       return true;
@@ -457,6 +479,10 @@ async function verifyServerAccess(path, body, messageElement, fallbackMessage) {
     });
     return true;
   } catch (error) {
+    if (isMissingApiError(error)) {
+      return null;
+    }
+
     if (error.status) {
       setMessage(messageElement, error.message || fallbackMessage);
       return false;
