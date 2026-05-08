@@ -318,6 +318,14 @@ function makeDefaultUsername(pkg) {
     .slice(0, 32) || "user";
 }
 
+function packageUsernameMatches(pkg, username) {
+  const input = String(username || "").trim().toLowerCase();
+  const candidates = [pkg.username, makeDefaultUsername(pkg), pkg.name, pkg.id]
+    .filter(Boolean)
+    .map((value) => String(value).trim().toLowerCase());
+  return candidates.includes(input);
+}
+
 function normalizeData(data) {
   const defaults = seedData();
   const hasDeactivatedFeatureDefaults = data.featureStateDefaultMode === "deactivated";
@@ -1507,9 +1515,7 @@ elements.loginForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  const pkg = appData.packages.find(
-    (item) => String(item.username || "").toLowerCase() === username.toLowerCase() && item.password === password
-  );
+  const pkg = appData.packages.find((item) => packageUsernameMatches(item, username) && item.password === password);
 
   if (!pkg) {
     setMessage(elements.loginMessage, "Incorrect username or password");

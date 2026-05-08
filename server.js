@@ -196,6 +196,14 @@ function makeDefaultUsername(pkg = {}) {
     .slice(0, 32) || "user";
 }
 
+function packageUsernameMatches(pkg = {}, username = "") {
+  const input = String(username || "").trim().toLowerCase();
+  const candidates = [pkg.username, makeDefaultUsername(pkg), pkg.name, pkg.id]
+    .filter(Boolean)
+    .map((value) => String(value).trim().toLowerCase());
+  return candidates.includes(input);
+}
+
 function normalizeData(data = {}) {
   const defaults = seedData();
   return {
@@ -407,9 +415,7 @@ async function handleApi(req, res, pathname) {
         });
       }
 
-      const pkg = data.packages.find(
-        (item) => String(item.username || "").toLowerCase() === username.toLowerCase() && item.password === password
-      );
+      const pkg = data.packages.find((item) => packageUsernameMatches(item, username) && item.password === password);
       if (!pkg) {
         return sendJson(res, 401, { message: "Incorrect username or password" });
       }

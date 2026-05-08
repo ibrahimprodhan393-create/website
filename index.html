@@ -1719,6 +1719,235 @@
         }
       }
     </style>
+    <style id="hyper-image-overlay-login">
+      body.login-active {
+        background: #020005 !important;
+      }
+
+      body.login-active .hyper-login {
+        display: grid !important;
+        place-items: start center !important;
+        width: 100vw !important;
+        min-height: 100svh !important;
+        height: 100svh !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        background: #020005 !important;
+      }
+
+      body.login-active .cyber-frame {
+        position: relative !important;
+        width: max(100vw, calc(100svh * 0.66640625)) !important;
+        height: 100svh !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+        background: url("assets/LOGO.jpeg") center center / 100% 100% no-repeat !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        overflow: hidden !important;
+      }
+
+      body.login-active .hyper-hero,
+      body.login-active .lock-orb,
+      body.login-active .login-intro,
+      body.login-active .secure-note,
+      body.login-active .hyper-copyright,
+      body.login-active .login-benefits,
+      body.login-active .powered-line,
+      body.login-active .circuit-rail,
+      body.login-active .cyber-frame::before,
+      body.login-active .cyber-frame::after,
+      body.login-active .hyper-login::before,
+      body.login-active .hyper-login::after {
+        display: none !important;
+      }
+
+      body.login-active .hyper-card.login-panel {
+        position: absolute !important;
+        inset: 0 !important;
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: transparent !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+      }
+
+      body.login-active .hyper-card.login-panel::before {
+        display: none !important;
+      }
+
+      body.login-active #loginForm {
+        position: absolute !important;
+        inset: 0 !important;
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      body.login-active .login-field-label,
+      body.login-active #loginForm > .sr-only {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+      }
+
+      body.login-active .password-shell {
+        position: absolute !important;
+        left: 19.6% !important;
+        width: 60.8% !important;
+        height: 5.35% !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 6.4% 0 8.4% !important;
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 10% !important;
+        align-items: center !important;
+        background: transparent !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+
+      body.login-active .username-shell {
+        top: 58.05% !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+      }
+
+      body.login-active #loginForm > .password-shell:not(.username-shell) {
+        top: 68.25% !important;
+      }
+
+      body.login-active .input-user,
+      body.login-active .input-lock {
+        display: none !important;
+      }
+
+      body.login-active .password-shell input {
+        width: 100% !important;
+        min-height: 100% !important;
+        height: 100% !important;
+        padding: 0 !important;
+        color: #ffffff !important;
+        background: transparent !important;
+        border: 0 !important;
+        outline: 0 !important;
+        box-shadow: none !important;
+        font-size: clamp(0.92rem, 2.6svh, 1.08rem) !important;
+        font-weight: 700 !important;
+        text-shadow: 0 0 10px rgba(164, 69, 255, 0.8) !important;
+      }
+
+      body.login-active .password-shell input::placeholder {
+        color: transparent !important;
+      }
+
+      body.login-active .password-toggle {
+        width: 100% !important;
+        min-height: 100% !important;
+        padding: 0 !important;
+        color: transparent !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        overflow: hidden !important;
+      }
+
+      body.login-active .login-options {
+        position: absolute !important;
+        left: 19.35% !important;
+        top: 76.05% !important;
+        width: 30% !important;
+        height: 3.1% !important;
+        display: block !important;
+        margin: 0 !important;
+      }
+
+      body.login-active .remember-line {
+        position: absolute !important;
+        inset: 0 !important;
+        display: block !important;
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        color: transparent !important;
+      }
+
+      body.login-active .remember-line input {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 24px !important;
+        height: 24px !important;
+        min-height: 24px !important;
+        margin: 0 !important;
+        opacity: 0 !important;
+      }
+
+      body.login-active .remember-line span,
+      body.login-active .login-options p,
+      body.login-active .login-admin-link {
+        color: transparent !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+      }
+
+      body.login-active .login-submit {
+        position: absolute !important;
+        left: 19.6% !important;
+        top: 79.45% !important;
+        width: 60.7% !important;
+        height: 6.8% !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        color: transparent !important;
+        background: transparent !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        overflow: hidden !important;
+      }
+
+      body.login-active .login-submit span {
+        color: transparent !important;
+      }
+
+      body.login-active #loginMessage {
+        position: absolute !important;
+        left: 19.6% !important;
+        top: 86.9% !important;
+        width: 60.7% !important;
+        margin: 0 !important;
+        min-height: 22px !important;
+        color: #ff91d6 !important;
+        font-size: clamp(0.72rem, 1.7svh, 0.9rem) !important;
+        font-weight: 900 !important;
+        text-align: center !important;
+        text-shadow: 0 0 12px rgba(180, 46, 255, 0.95) !important;
+      }
+
+      body.login-active #loginMessage.ok,
+      body.login-active #loginMessage.neutral {
+        color: #d9a7ff !important;
+      }
+
+      @media (max-width: 640px) {
+        body.login-active .cyber-frame {
+          width: max(100vw, calc(100svh * 0.66640625)) !important;
+          height: 100svh !important;
+        }
+      }
+    </style>
   </head>
   <body class="login-active">
     <div class="app-shell">
