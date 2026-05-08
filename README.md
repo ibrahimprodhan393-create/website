@@ -24,9 +24,10 @@ Run `neon-schema.sql` in Neon SQL Editor once.
 
 Sample login keys:
 
-- Admin panel: `ADMIN-2026`
-- `KEY-1DAY-2026`
-- `KEY-7DAY-2026`
-- `KEY-30DAY-2026`
+- Admin panel username: `admin`
+- Admin panel password: `ADMIN-2026`
+- Starter user: `starter` / `KEY-1DAY-2026`
+- 7 day user: `premium7` / `KEY-7DAY-2026`
+- 30 day user: `ultimate30` / `KEY-30DAY-2026`
 
 With Neon connected, admin settings, packages, features, and device locks are saved in Neon and will show the same data from any phone/browser.

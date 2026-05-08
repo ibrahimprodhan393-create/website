@@ -1331,6 +1331,394 @@
         }
       }
     </style>
+    <style id="hyper-purple-login-ui">
+      body.login-active {
+        color: #ffffff !important;
+        background: #020006 !important;
+      }
+
+      body.login-active .app-shell,
+      body.login-active main,
+      body.login-active #userView.active,
+      body.login-active #loginView {
+        min-height: 100svh !important;
+        height: auto !important;
+      }
+
+      body.login-active .hyper-login {
+        position: relative !important;
+        display: grid !important;
+        justify-items: center !important;
+        align-content: start !important;
+        width: 100% !important;
+        min-height: 100svh !important;
+        padding: 0 12px 28px !important;
+        overflow-x: hidden !important;
+        background:
+          linear-gradient(180deg, rgba(2, 0, 8, 0.1), rgba(2, 0, 8, 0.42) 54%, #020006 100%),
+          url("assets/LOGO.jpeg") center top / min(100vw, 853px) auto no-repeat !important;
+      }
+
+      body.login-active .cyber-frame {
+        position: relative !important;
+        z-index: 2 !important;
+        display: grid !important;
+        justify-items: center !important;
+        align-content: start !important;
+        width: min(100%, 650px) !important;
+        min-height: auto !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+      }
+
+      body.login-active .hyper-hero {
+        display: block !important;
+        width: 100% !important;
+        min-height: clamp(300px, 38.5svh, 500px) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+
+      body.login-active .hyper-logo,
+      body.login-active .hyper-hero h2,
+      body.login-active .hyper-hero p,
+      body.login-active .login-benefits,
+      body.login-active .powered-line,
+      body.login-active .hyper-copyright {
+        display: none !important;
+      }
+
+      body.login-active .hyper-card.login-panel {
+        position: relative !important;
+        width: min(590px, calc(100vw - 34px)) !important;
+        margin: 0 auto !important;
+        padding: 78px clamp(22px, 4vw, 38px) 28px !important;
+        color: #ffffff !important;
+        background:
+          linear-gradient(180deg, rgba(13, 7, 35, 0.9), rgba(5, 3, 18, 0.95)),
+          radial-gradient(circle at 50% 0%, rgba(164, 54, 255, 0.24), transparent 44%) !important;
+        border: 2px solid rgba(176, 66, 255, 0.78) !important;
+        border-radius: 34px !important;
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+          0 0 34px rgba(147, 38, 255, 0.72),
+          0 30px 90px rgba(0, 0, 0, 0.72) !important;
+        backdrop-filter: blur(8px) !important;
+      }
+
+      body.login-active .hyper-card.login-panel::before {
+        content: "" !important;
+        position: absolute !important;
+        inset: 18px 26px auto !important;
+        height: 42px !important;
+        border-top: 1px solid rgba(168, 79, 255, 0.34) !important;
+        background:
+          linear-gradient(90deg, transparent, rgba(155, 48, 255, 0.45), transparent),
+          repeating-linear-gradient(90deg, transparent 0 30px, rgba(161, 67, 255, 0.18) 31px 33px) !important;
+        opacity: 0.7 !important;
+        pointer-events: none !important;
+      }
+
+      body.login-active .lock-orb {
+        top: -48px !important;
+        width: 96px !important;
+        height: 96px !important;
+        background: rgba(16, 9, 43, 0.92) !important;
+        border: 1px solid rgba(184, 83, 255, 0.64) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 0 26px rgba(163, 46, 255, 0.84) !important;
+      }
+
+      body.login-active .lock-orb span {
+        width: 42px !important;
+        height: 48px !important;
+        border: 4px solid #c38cff !important;
+        border-top: 0 !important;
+        border-radius: 8px 8px 18px 18px !important;
+        transform: translateY(4px) !important;
+      }
+
+      body.login-active .lock-orb span::before {
+        display: none !important;
+      }
+
+      body.login-active .lock-orb span::after {
+        content: "" !important;
+        left: 50% !important;
+        top: -10px !important;
+        width: 34px !important;
+        height: 24px !important;
+        background: transparent !important;
+        border: 4px solid #c38cff !important;
+        border-bottom: 0 !important;
+        border-radius: 18px 18px 0 0 !important;
+        transform: translateX(-50%) !important;
+      }
+
+      body.login-active .login-intro h3 {
+        color: #ffffff !important;
+        font-family: "Segoe UI", Arial, sans-serif !important;
+        font-size: clamp(1.45rem, 4.6vw, 2rem) !important;
+        letter-spacing: 0.12em !important;
+        text-shadow: 0 0 16px rgba(180, 80, 255, 0.72) !important;
+      }
+
+      body.login-active .login-intro p {
+        margin-bottom: 28px !important;
+        color: rgba(255, 255, 255, 0.76) !important;
+        font-size: 0.98rem !important;
+      }
+
+      body.login-active .login-field-label {
+        display: block !important;
+        margin: 0 0 10px !important;
+        color: #ffffff !important;
+        font-size: 0.85rem !important;
+        font-weight: 900 !important;
+        letter-spacing: 0.07em !important;
+        text-align: left !important;
+      }
+
+      body.login-active .password-shell {
+        display: grid !important;
+        grid-template-columns: 42px minmax(0, 1fr) 48px !important;
+        align-items: center !important;
+        min-height: 68px !important;
+        margin: 0 0 24px !important;
+        padding: 0 16px !important;
+        background: rgba(5, 1, 18, 0.86) !important;
+        border: 1px solid rgba(173, 50, 255, 0.9) !important;
+        border-radius: 10px !important;
+        box-shadow:
+          inset 0 0 18px rgba(123, 27, 255, 0.22),
+          0 0 18px rgba(139, 29, 255, 0.35) !important;
+      }
+
+      body.login-active .username-shell {
+        grid-template-columns: 42px minmax(0, 1fr) !important;
+      }
+
+      body.login-active .password-shell input {
+        min-height: 62px !important;
+        color: #ffffff !important;
+        background: transparent !important;
+        border: 0 !important;
+        outline: 0 !important;
+        font-size: 1rem !important;
+      }
+
+      body.login-active .password-shell input::placeholder {
+        color: rgba(255, 255, 255, 0.52) !important;
+      }
+
+      body.login-active .input-user,
+      body.login-active .input-lock {
+        position: relative !important;
+        display: block !important;
+        width: 28px !important;
+        height: 28px !important;
+        border: 0 !important;
+        background: transparent !important;
+      }
+
+      body.login-active .input-user::before {
+        content: "" !important;
+        position: absolute !important;
+        left: 7px !important;
+        top: 1px !important;
+        width: 12px !important;
+        height: 12px !important;
+        border: 3px solid #b98cff !important;
+        border-radius: 50% !important;
+      }
+
+      body.login-active .input-user::after {
+        content: "" !important;
+        position: absolute !important;
+        left: 2px !important;
+        bottom: 1px !important;
+        width: 22px !important;
+        height: 14px !important;
+        border: 3px solid #b98cff !important;
+        border-bottom: 0 !important;
+        border-radius: 18px 18px 0 0 !important;
+      }
+
+      body.login-active .input-lock {
+        width: 24px !important;
+        height: 22px !important;
+        border: 3px solid #b98cff !important;
+        border-radius: 5px !important;
+      }
+
+      body.login-active .input-lock::before {
+        content: "" !important;
+        position: absolute !important;
+        left: 50% !important;
+        top: -15px !important;
+        width: 16px !important;
+        height: 16px !important;
+        border: 3px solid #b98cff !important;
+        border-bottom: 0 !important;
+        border-radius: 12px 12px 0 0 !important;
+        transform: translateX(-50%) !important;
+      }
+
+      body.login-active .input-lock::after {
+        content: "" !important;
+        position: absolute !important;
+        left: 50% !important;
+        top: 8px !important;
+        width: 4px !important;
+        height: 8px !important;
+        background: #b98cff !important;
+        border-radius: 4px !important;
+        transform: translateX(-50%) !important;
+      }
+
+      body.login-active .password-toggle {
+        color: #cf7cff !important;
+        background: transparent !important;
+        font-size: 0.8rem !important;
+        font-weight: 900 !important;
+      }
+
+      body.login-active .login-options {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 12px !important;
+        margin: -2px 0 22px !important;
+      }
+
+      body.login-active .remember-line {
+        color: #ffffff !important;
+        font-size: 0.86rem !important;
+        font-weight: 900 !important;
+        letter-spacing: 0.04em !important;
+      }
+
+      body.login-active .remember-line input {
+        width: 20px !important;
+        height: 20px !important;
+        min-height: 20px !important;
+        opacity: 1 !important;
+        accent-color: #a535ff !important;
+      }
+
+      body.login-active .remember-line span,
+      body.login-active .login-options p,
+      body.login-active .login-admin-link {
+        color: rgba(255, 255, 255, 0.86) !important;
+      }
+
+      body.login-active .login-submit {
+        width: 100% !important;
+        min-height: 76px !important;
+        color: #ffffff !important;
+        background:
+          linear-gradient(90deg, rgba(115, 22, 255, 0.85), rgba(42, 4, 100, 0.72)),
+          linear-gradient(135deg, transparent 0 8%, rgba(255, 255, 255, 0.14) 8% 10%, transparent 10% 90%, rgba(255, 255, 255, 0.14) 90% 92%, transparent 92%) !important;
+        border: 2px solid #b537ff !important;
+        border-radius: 10px !important;
+        box-shadow:
+          inset 0 0 24px rgba(218, 113, 255, 0.45),
+          0 0 24px rgba(174, 48, 255, 0.92) !important;
+        font-size: clamp(1.35rem, 4.4vw, 1.9rem) !important;
+        font-weight: 900 !important;
+        letter-spacing: 0.18em !important;
+      }
+
+      body.login-active .login-submit span {
+        color: #d8a4ff !important;
+      }
+
+      body.login-active .secure-note {
+        display: none !important;
+      }
+
+      body.login-active .hyper-card .form-message {
+        color: #ff8ea7 !important;
+        text-align: center !important;
+        text-shadow: 0 0 10px rgba(255, 54, 117, 0.35) !important;
+      }
+
+      body.login-active .hyper-card .form-message.ok,
+      body.login-active .hyper-card .form-message.neutral {
+        color: #cfa6ff !important;
+      }
+
+      @media (max-width: 640px) {
+        body.login-active .hyper-login {
+          padding: 0 10px 18px !important;
+          background-size: 100vw auto !important;
+        }
+
+        body.login-active .hyper-hero {
+          min-height: clamp(240px, 38.5svh, 360px) !important;
+        }
+
+        body.login-active .hyper-card.login-panel {
+          width: min(100%, 360px) !important;
+          padding: 58px 18px 20px !important;
+          border-radius: 28px !important;
+        }
+
+        body.login-active .lock-orb {
+          top: -38px !important;
+          width: 76px !important;
+          height: 76px !important;
+        }
+
+        body.login-active .lock-orb span {
+          width: 32px !important;
+          height: 36px !important;
+          border-width: 3px !important;
+        }
+
+        body.login-active .lock-orb span::after {
+          width: 26px !important;
+          height: 18px !important;
+          border-width: 3px !important;
+        }
+
+        body.login-active .login-intro h3 {
+          font-size: 1.42rem !important;
+        }
+
+        body.login-active .login-intro p {
+          margin-bottom: 22px !important;
+          font-size: 0.86rem !important;
+        }
+
+        body.login-active .password-shell {
+          min-height: 58px !important;
+          margin-bottom: 18px !important;
+          padding: 0 12px !important;
+        }
+
+        body.login-active .password-shell input {
+          min-height: 54px !important;
+          font-size: 0.9rem !important;
+        }
+
+        body.login-active .login-options {
+          align-items: flex-start !important;
+          flex-direction: column !important;
+          margin-bottom: 18px !important;
+        }
+
+        body.login-active .login-submit {
+          min-height: 62px !important;
+          font-size: 1.25rem !important;
+        }
+      }
+    </style>
   </head>
   <body class="login-active">
     <div class="app-shell">
@@ -1369,15 +1757,22 @@
                 </div>
                 <div class="login-intro">
                   <h3>WELCOME BACK</h3>
-                  <p>Enter your access password to continue</p>
+                  <p>Login to access your Hyper Regedit account</p>
                 </div>
 
                 <form id="loginForm" autocomplete="off">
+                  <label class="login-field-label" for="loginUsername">EMAIL OR USERNAME</label>
+                  <div class="password-shell username-shell">
+                    <span class="input-user" aria-hidden="true"></span>
+                    <input id="loginUsername" name="loginUsername" type="text" placeholder="Enter your email or username" required>
+                  </div>
+
+                  <label class="login-field-label" for="loginPassword">PASSWORD</label>
                   <label class="sr-only" for="loginPassword">Access Password / Login Key</label>
                   <div class="password-shell">
                     <span class="input-lock" aria-hidden="true"></span>
-                    <input id="loginPassword" name="loginPassword" type="password" placeholder="Enter Access Password" required>
-                    <button class="password-toggle" type="button" id="togglePasswordButton" aria-label="Show password">SHOW</button>
+                    <input id="loginPassword" name="loginPassword" type="password" placeholder="Enter your password" required>
+                    <button class="password-toggle" type="button" id="togglePasswordButton" aria-label="Show password">EYE</button>
                   </div>
 
                   <div class="login-options">
@@ -1689,15 +2084,19 @@
             <form id="adminSettingsForm" class="stacked-form" autocomplete="off">
               <div class="two-column">
                 <label>
+                  Admin Panel Username
+                  <input id="adminUsernameInput" type="text" placeholder="admin" required>
+                </label>
+                <label>
                   Admin Panel Password
                   <input id="adminPasswordInput" type="text" placeholder="Set your admin password" required>
                 </label>
+              </div>
+              <div class="two-column">
                 <label>
                   Selected Contact Name
                   <input id="adminContactLabel" type="text" placeholder="WhatsApp Admin">
                 </label>
-              </div>
-              <div class="two-column">
                 <label>
                   Selected Contact
                   <input id="adminContactValue" type="text" placeholder="https://wa.me/8801000000000">
@@ -1737,12 +2136,16 @@
                     <input id="pkgName" type="text" placeholder="7 Days Premium" required>
                   </label>
                   <label>
-                    Login Password / Access Key
-                    <input id="pkgPassword" type="text" placeholder="KEY-7DAY-2026" required>
+                    Login Username / User ID
+                    <input id="pkgUsername" type="text" placeholder="user-7day" required>
                   </label>
                 </div>
 
                 <div class="two-column">
+                  <label>
+                    Login Password / Access Key
+                    <input id="pkgPassword" type="text" placeholder="KEY-7DAY-2026" required>
+                  </label>
                   <label>
                     Validity
                     <select id="pkgValidity">

@@ -90,6 +90,7 @@ function seedData() {
 
   return {
     settings: {
+      adminUsername: "admin",
       adminPassword: DEFAULT_ADMIN_PASSWORD,
       contactLabel: "WhatsApp Admin",
       contactValue: "https://wa.me/8801000000000",
@@ -102,6 +103,7 @@ function seedData() {
       {
         id: "pkg_1day",
         name: "1 Day Starter",
+        username: "starter",
         password: "KEY-1DAY-2026",
         validityType: "1",
         customDays: 1,
@@ -127,6 +129,7 @@ function seedData() {
       {
         id: "pkg_7day",
         name: "7 Days Premium",
+        username: "premium7",
         password: "KEY-7DAY-2026",
         validityType: "7",
         customDays: 7,
@@ -152,6 +155,7 @@ function seedData() {
       {
         id: "pkg_30day",
         name: "30 Days Ultimate",
+        username: "ultimate30",
         password: "KEY-30DAY-2026",
         validityType: "30",
         customDays: 30,
@@ -183,6 +187,15 @@ function getFinalLoadingMinutes(pkg) {
   return Math.max(60, Math.min(80, Number.isFinite(raw) ? raw : 60));
 }
 
+function makeDefaultUsername(pkg = {}) {
+  return String(pkg.username || pkg.name || pkg.id || "user")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 32) || "user";
+}
+
 function normalizeData(data = {}) {
   const defaults = seedData();
   return {
@@ -199,6 +212,7 @@ function normalizeData(data = {}) {
     })),
     packages: (data.packages || defaults.packages).map((pkg) => ({
       ...pkg,
+      username: makeDefaultUsername(pkg),
       featureIds: Array.isArray(pkg.featureIds) ? pkg.featureIds : [],
       deviceName: pkg.deviceName || "Registered Device",
       legalInfo: pkg.legalInfo || "Legal and regulatory access details are assigned by the admin.",
@@ -378,12 +392,14 @@ async function handleApi(req, res, pathname) {
 
   if (req.method === "POST" && pathname === "/api/login") {
     const body = await readJsonBody(req);
+    const username = String(body.username || "").trim();
     const password = String(body.password || "").trim();
     const deviceId = String(body.deviceId || "").trim();
 
     return withStoreUpdate((data) => {
+      const adminUsername = String(data.settings?.adminUsername || "admin").trim();
       const adminPassword = String(data.settings?.adminPassword || DEFAULT_ADMIN_PASSWORD).trim();
-      if (password === adminPassword) {
+      if (username.toLowerCase() === adminUsername.toLowerCase() && password === adminPassword) {
         return sendJson(res, 200, {
           role: "admin",
           token: createAdminSession(),
@@ -391,9 +407,11 @@ async function handleApi(req, res, pathname) {
         });
       }
 
-      const pkg = data.packages.find((item) => item.password === password);
+      const pkg = data.packages.find(
+        (item) => String(item.username || "").toLowerCase() === username.toLowerCase() && item.password === password
+      );
       if (!pkg) {
-        return sendJson(res, 401, { message: "Incorrect Password" });
+        return sendJson(res, 401, { message: "Incorrect username or password" });
       }
 
       const accessError = verifyPackageDevice(pkg, deviceId);

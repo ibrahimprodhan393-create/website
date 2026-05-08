@@ -39,6 +39,7 @@ const elements = {
   loginView: $("#loginView"),
   dashboardView: $("#dashboardView"),
   loginForm: $("#loginForm"),
+  loginUsername: $("#loginUsername"),
   loginPassword: $("#loginPassword"),
   togglePasswordButton: $("#togglePasswordButton"),
   contactAdminLoginButton: $("#contactAdminLoginButton"),
@@ -95,6 +96,7 @@ const elements = {
   successMessage: $("#successMessage"),
   restartFlowButton: $("#restartFlowButton"),
   adminSettingsForm: $("#adminSettingsForm"),
+  adminUsernameInput: $("#adminUsernameInput"),
   adminPasswordInput: $("#adminPasswordInput"),
   adminContactLabel: $("#adminContactLabel"),
   adminContactValue: $("#adminContactValue"),
@@ -110,6 +112,7 @@ const elements = {
   packageFormTitle: $("#packageFormTitle"),
   packageId: $("#packageId"),
   pkgName: $("#pkgName"),
+  pkgUsername: $("#pkgUsername"),
   pkgPassword: $("#pkgPassword"),
   pkgValidity: $("#pkgValidity"),
   customValidityWrap: $("#customValidityWrap"),
@@ -197,6 +200,7 @@ function seedData() {
 
   return {
     settings: {
+      adminUsername: "admin",
       adminPassword: DEFAULT_ADMIN_PASSWORD,
       contactLabel: "WhatsApp Admin",
       contactValue: "https://wa.me/8801000000000",
@@ -209,6 +213,7 @@ function seedData() {
       {
         id: "pkg_1day",
         name: "1 Day Starter",
+        username: "starter",
         password: "KEY-1DAY-2026",
         validityType: "1",
         customDays: 1,
@@ -232,6 +237,7 @@ function seedData() {
       {
         id: "pkg_7day",
         name: "7 Days Premium",
+        username: "premium7",
         password: "KEY-7DAY-2026",
         validityType: "7",
         customDays: 7,
@@ -255,6 +261,7 @@ function seedData() {
       {
         id: "pkg_30day",
         name: "30 Days Ultimate",
+        username: "ultimate30",
         password: "KEY-30DAY-2026",
         validityType: "30",
         customDays: 30,
@@ -302,6 +309,15 @@ function loadData() {
   }
 }
 
+function makeDefaultUsername(pkg) {
+  return String(pkg.username || pkg.name || pkg.id || "user")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 32) || "user";
+}
+
 function normalizeData(data) {
   const defaults = seedData();
   const hasDeactivatedFeatureDefaults = data.featureStateDefaultMode === "deactivated";
@@ -319,6 +335,7 @@ function normalizeData(data) {
     userFeatureStates: hasDeactivatedFeatureDefaults ? data.userFeatureStates || {} : {},
     packages: (data.packages || defaults.packages).map((pkg) => ({
       ...pkg,
+      username: makeDefaultUsername(pkg),
       deviceName: pkg.deviceName || "Registered Device",
       legalInfo: pkg.legalInfo || "Legal and regulatory access details are assigned by the admin.",
       packageDetails: pkg.packageDetails || "Package details are assigned by the admin.",
@@ -425,11 +442,11 @@ function mergeActivePackage(pkg) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
 }
 
-async function loginWithServer(password) {
+async function loginWithServer(username, password) {
   try {
     const payload = await apiRequest("/api/login", {
       method: "POST",
-      body: { password, deviceId }
+      body: { username, password, deviceId }
     });
 
     if (payload.role === "admin") {
@@ -439,6 +456,7 @@ async function loginWithServer(password) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
       adminAuthenticated = true;
       activePackageId = null;
+      elements.loginUsername.value = "";
       elements.loginPassword.value = "";
       elements.loginView.classList.remove("hidden");
       elements.dashboardView.classList.add("hidden");
@@ -635,7 +653,7 @@ function showLoginGate(message = "") {
   });
   setMessage(elements.loginMessage, message, message ? "neutral" : "error");
   updatePageMode();
-  elements.loginPassword.focus();
+  elements.loginUsername.focus();
 }
 
 function clearCountdownTimer() {
@@ -1057,7 +1075,7 @@ function renderPackageList() {
         <article class="access-row">
           <div>
             <h4>${escapeHtml(pkg.name)}</h4>
-            <p>Password: ${escapeHtml(pkg.password)} | Device: ${escapeHtml(pkg.deviceName || "Registered Device")} | Serial: ${escapeHtml(pkg.deviceSerial)}</p>
+            <p>Username: ${escapeHtml(pkg.username)} | Password: ${escapeHtml(pkg.password)} | Device: ${escapeHtml(pkg.deviceName || "Registered Device")} | Serial: ${escapeHtml(pkg.deviceSerial)}</p>
             <div class="access-meta">
               <span>${status}</span>
               <span>${getValidityDays(pkg)} day(s)</span>
@@ -1095,6 +1113,7 @@ function resetPackageForm() {
   elements.pkgLoadingPreset.value = "60";
   elements.pkgCustomDays.value = "1";
   elements.pkgCustomLoading.value = "60";
+  elements.pkgUsername.value = "";
   elements.pkgDeviceName.value = "Registered Device";
   elements.pkgLegalInfo.value = "Legal and regulatory access details are assigned by the admin.";
   elements.pkgPackageDetails.value = "Package details are assigned by the admin.";
@@ -1110,6 +1129,7 @@ function fillPackageForm(pkg) {
   elements.packageFormTitle.textContent = "Edit Package";
   elements.savePackageButton.textContent = "Update Package";
   elements.pkgName.value = pkg.name;
+  elements.pkgUsername.value = pkg.username || makeDefaultUsername(pkg);
   elements.pkgPassword.value = pkg.password;
   elements.pkgValidity.value = pkg.validityType;
   elements.pkgCustomDays.value = pkg.customDays || getValidityDays(pkg);
@@ -1140,6 +1160,10 @@ function savePackageFromForm(event) {
 
   const id = elements.packageId.value || makeId("pkg");
   const existing = appData.packages.find((pkg) => pkg.id === id);
+  const username = elements.pkgUsername.value.trim();
+  const duplicateUsername = appData.packages.some(
+    (pkg) => pkg.id !== id && String(pkg.username || "").toLowerCase() === username.toLowerCase()
+  );
   const duplicatePassword = appData.packages.some(
     (pkg) => pkg.id !== id && pkg.password === elements.pkgPassword.value.trim()
   );
@@ -1152,6 +1176,11 @@ function savePackageFromForm(event) {
   const duplicateCertificate = appData.packages.some(
     (pkg) => pkg.id !== id && pkg.certificateCode === elements.pkgCertificate.value.trim()
   );
+
+  if (duplicateUsername) {
+    setMessage(elements.packageFormMessage, "This username is already used by another package.");
+    return;
+  }
 
   if (duplicatePassword) {
     setMessage(elements.packageFormMessage, "This password is already used by another package.");
@@ -1187,6 +1216,7 @@ function savePackageFromForm(event) {
   const packageData = {
     id,
     name: elements.pkgName.value.trim(),
+    username,
     password: elements.pkgPassword.value.trim(),
     validityType,
     customDays: validityDays,
@@ -1287,6 +1317,7 @@ function renderAdmin() {
 
 function renderAdminSettings() {
   const settings = appData.settings || {};
+  elements.adminUsernameInput.value = settings.adminUsername || "admin";
   elements.adminPasswordInput.value = settings.adminPassword || DEFAULT_ADMIN_PASSWORD;
   elements.adminContactLabel.value = settings.contactLabel || "";
   elements.adminContactValue.value = settings.contactValue || "";
@@ -1296,6 +1327,7 @@ function renderAdminSettings() {
 function saveAdminSettings(event) {
   event.preventDefault();
   appData.settings = {
+    adminUsername: elements.adminUsernameInput.value.trim() || "admin",
     adminPassword: elements.adminPasswordInput.value.trim(),
     contactLabel: elements.adminContactLabel.value.trim(),
     contactValue: elements.adminContactValue.value.trim(),
@@ -1441,7 +1473,7 @@ $$("[data-view]").forEach((button) => {
 elements.togglePasswordButton.addEventListener("click", () => {
   const showing = elements.loginPassword.type === "text";
   elements.loginPassword.type = showing ? "password" : "text";
-  elements.togglePasswordButton.textContent = showing ? "SHOW" : "HIDE";
+  elements.togglePasswordButton.textContent = showing ? "EYE" : "HIDE";
   elements.togglePasswordButton.setAttribute("aria-label", showing ? "Show password" : "Hide password");
 });
 
@@ -1449,15 +1481,24 @@ elements.contactAdminLoginButton.addEventListener("click", openSelectedAdminCont
 
 elements.loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  const username = elements.loginUsername.value.trim();
   const password = elements.loginPassword.value.trim();
-  const handledByServer = await loginWithServer(password);
+
+  if (!username || !password) {
+    setMessage(elements.loginMessage, "Username and password required");
+    return;
+  }
+
+  const handledByServer = await loginWithServer(username, password);
   if (handledByServer) return;
 
+  const adminUsername = String(appData.settings?.adminUsername || "admin").trim();
   const adminPassword = (appData.settings?.adminPassword || DEFAULT_ADMIN_PASSWORD).trim();
 
-  if (password === adminPassword) {
+  if (username.toLowerCase() === adminUsername.toLowerCase() && password === adminPassword) {
     adminAuthenticated = true;
     activePackageId = null;
+    elements.loginUsername.value = "";
     elements.loginPassword.value = "";
     elements.loginView.classList.remove("hidden");
     elements.dashboardView.classList.add("hidden");
@@ -1466,10 +1507,12 @@ elements.loginForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  const pkg = appData.packages.find((item) => item.password === password);
+  const pkg = appData.packages.find(
+    (item) => String(item.username || "").toLowerCase() === username.toLowerCase() && item.password === password
+  );
 
   if (!pkg) {
-    setMessage(elements.loginMessage, "Incorrect Password");
+    setMessage(elements.loginMessage, "Incorrect username or password");
     return;
   }
 
@@ -1492,6 +1535,7 @@ elements.logoutButton.addEventListener("click", () => {
   activePackageId = null;
   clearActiveTimer();
   clearCountdownTimer();
+  elements.loginUsername.value = "";
   elements.loginPassword.value = "";
   elements.loginView.classList.remove("hidden");
   elements.dashboardView.classList.add("hidden");
