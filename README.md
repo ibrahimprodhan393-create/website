@@ -1,19 +1,26 @@
 # Hyper Regedit Access Website
 
-This ZIP is prepared for Render Static Site deployment.
+This version is prepared for Render Web Service deployment with Neon database storage.
+
+Why Web Service is needed:
+
+Static Site stores admin data in each browser only. If you log in from another phone, it has a different `localStorage`, so the package/admin data will look different. To show the same admin data on every phone, the app must use a shared database through a server.
 
 Render settings:
 
-- Service type: Static Site
-- Build command: `echo "No build step required"`
-- Publish directory: `.`
+- Service type: Web Service
+- Runtime: Node
+- Build command: `npm install`
+- Start command: `npm start`
 
-Files needed for static hosting:
+Render environment variables:
 
-- `index.html`
-- `styles.css`
-- `app.js`
-- `render.yaml`
+- `DATABASE_URL` = your Neon pooled connection string
+- `ADMIN_PASSWORD` = optional first/default admin password
+
+Neon setup:
+
+Run `neon-schema.sql` in Neon SQL Editor once.
 
 Sample login keys:
 
@@ -22,8 +29,4 @@ Sample login keys:
 - `KEY-7DAY-2026`
 - `KEY-30DAY-2026`
 
-Static-site note:
-
-The UI and flow stay the same, but static hosting stores admin packages/features in the current browser `localStorage`. That means package data created on one phone/browser is not shared automatically to other phones. Shared package login, Neon storage, and one-device locking across all users require the Node Web Service version.
-
-The login screen is built with HTML/CSS as a Hyper Regedit Access white/gold interface. It does not require a separate login image asset, so password input, remember, contact, and login controls remain real clickable form elements.
+With Neon connected, admin settings, packages, features, and device locks are saved in Neon and will show the same data from any phone/browser.
