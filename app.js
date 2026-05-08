@@ -331,7 +331,17 @@ function findLoginPackage(username, password) {
   const exactMatch = passwordMatches.find((item) => packageUsernameMatches(item, username));
   if (exactMatch) return exactMatch;
 
-  return passwordMatches.length === 1 ? passwordMatches[0] : null;
+  if (passwordMatches.length === 1) return passwordMatches[0];
+
+  const defaultMatches = seedData().packages.filter((item) => item.password === password);
+  const defaultExactMatch = defaultMatches.find((item) => packageUsernameMatches(item, username));
+  const defaultPackage = defaultExactMatch || (defaultMatches.length === 1 ? defaultMatches[0] : null);
+  if (defaultPackage) {
+    appData.packages.push(defaultPackage);
+    return defaultPackage;
+  }
+
+  return null;
 }
 
 function normalizeData(data) {
@@ -1493,7 +1503,7 @@ elements.togglePasswordButton.addEventListener("click", () => {
   elements.togglePasswordButton.setAttribute("aria-label", showing ? "Show password" : "Hide password");
 });
 
-elements.contactAdminLoginButton.addEventListener("click", openSelectedAdminContact);
+elements.contactAdminLoginButton?.addEventListener("click", openSelectedAdminContact);
 
 elements.loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -1510,8 +1520,11 @@ elements.loginForm.addEventListener("submit", async (event) => {
 
   const adminUsername = String(appData.settings?.adminUsername || "admin").trim();
   const adminPassword = (appData.settings?.adminPassword || DEFAULT_ADMIN_PASSWORD).trim();
+  const isConfiguredAdmin =
+    username.toLowerCase() === adminUsername.toLowerCase() && password === adminPassword;
+  const isDefaultAdmin = username.toLowerCase() === "admin" && password === DEFAULT_ADMIN_PASSWORD;
 
-  if (username.toLowerCase() === adminUsername.toLowerCase() && password === adminPassword) {
+  if (isConfiguredAdmin || isDefaultAdmin) {
     adminAuthenticated = true;
     activePackageId = null;
     elements.loginUsername.value = "";

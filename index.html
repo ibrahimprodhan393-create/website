@@ -3273,6 +3273,15 @@
         }
       }
     </style>
+    <style id="hyper-remove-login-lock">
+      body.login-active .lock-orb {
+        display: none !important;
+      }
+
+      body.login-active .hyper-card.login-panel {
+        padding-top: clamp(24px, 4dvh, 46px) !important;
+      }
+    </style>
   </head>
   <body class="login-active">
     <div class="app-shell">
@@ -3334,7 +3343,6 @@
                       <input type="checkbox" id="rememberAccess" checked>
                       <span>Remember me</span>
                     </label>
-                    <p>Need access? <button class="login-admin-link" type="button" id="contactAdminLoginButton">Contact Admin</button></p>
                   </div>
 
                   <button class="login-submit" type="submit">
