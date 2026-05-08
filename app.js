@@ -64,7 +64,6 @@ const elements = {
   installState: $("#installState"),
   startInstallButton: $("#startInstallButton"),
   contactButton: $("#contactButton"),
-  contactChoicePanel: $("#contactChoicePanel"),
   contactMessage: $("#contactMessage"),
   activationStage: $("#activationStage"),
   installStart: $("#installStart"),
@@ -123,7 +122,6 @@ const elements = {
   pkgWebCode: $("#pkgWebCode"),
   pkgCertificate: $("#pkgCertificate"),
   pkgContact: $("#pkgContact"),
-  pkgEmail: $("#pkgEmail"),
   pkgLegalInfo: $("#pkgLegalInfo"),
   pkgPackageDetails: $("#pkgPackageDetails"),
   pkgLoadingPreset: $("#pkgLoadingPreset"),
@@ -224,8 +222,6 @@ function seedData() {
         webAccessCode: "WEB-1DAY-4477",
         certificateCode: "CERT-1111",
         contactInfo: "WhatsApp: +8801000000000",
-        whatsappContact: "https://wa.me/8801000000000",
-        emailContact: "support@example.com",
         legalInfo: "Regulatory model and access terms verified for this device.",
         packageDetails: "Starter access package with selected essential modules.",
         loadingPreset: "60",
@@ -249,8 +245,6 @@ function seedData() {
         webAccessCode: "WEB-7DAY-8899",
         certificateCode: "CERT-2222",
         contactInfo: "support@example.com",
-        whatsappContact: "https://wa.me/8801000000000",
-        emailContact: "support@example.com",
         legalInfo: "Private access certificate is active. Use is limited to the assigned serial number.",
         packageDetails: "Premium weekly package with device support and configuration access.",
         loadingPreset: "60",
@@ -274,8 +268,6 @@ function seedData() {
         webAccessCode: "WEB-30DAY-5522",
         certificateCode: "CERT-3333",
         contactInfo: "https://example.com/support",
-        whatsappContact: "https://wa.me/8801000000000",
-        emailContact: "support@example.com",
         legalInfo: "Full package authorization is active for the registered device profile.",
         packageDetails: "Ultimate package with all modules and extended access duration.",
         loadingPreset: "80",
@@ -310,25 +302,6 @@ function loadData() {
   }
 }
 
-function isEmailContact(value) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
-}
-
-function inferEmailContact(value) {
-  const contact = String(value || "").trim();
-  return isEmailContact(contact) ? contact : "";
-}
-
-function inferWhatsappContact(value) {
-  const contact = String(value || "").trim();
-  if (!contact || isEmailContact(contact)) return "";
-  if (/wa\.me|whats\s*app/i.test(contact)) return contact;
-
-  const phoneCandidate = contact.replace(/[^\d+]/g, "");
-  const digits = phoneCandidate.replace(/^\+/, "");
-  return /^\+?\d[\d\s().-]{7,}$/.test(contact) && digits.length >= 8 ? contact : "";
-}
-
 function normalizeData(data) {
   const defaults = seedData();
   const hasDeactivatedFeatureDefaults = data.featureStateDefaultMode === "deactivated";
@@ -344,20 +317,13 @@ function normalizeData(data) {
       image: feature.image || ""
     })),
     userFeatureStates: hasDeactivatedFeatureDefaults ? data.userFeatureStates || {} : {},
-    packages: (data.packages || defaults.packages).map((pkg) => {
-      const whatsappContact = pkg.whatsappContact || inferWhatsappContact(pkg.contactInfo);
-      const emailContact = pkg.emailContact || inferEmailContact(pkg.contactInfo);
-      return {
-        ...pkg,
-        contactInfo: pkg.contactInfo || whatsappContact || emailContact,
-        whatsappContact,
-        emailContact,
-        deviceName: pkg.deviceName || "Registered Device",
-        legalInfo: pkg.legalInfo || "Legal and regulatory access details are assigned by the admin.",
-        packageDetails: pkg.packageDetails || "Package details are assigned by the admin.",
-        loadingMinutes: getFinalLoadingMinutes(pkg)
-      };
-    })
+    packages: (data.packages || defaults.packages).map((pkg) => ({
+      ...pkg,
+      deviceName: pkg.deviceName || "Registered Device",
+      legalInfo: pkg.legalInfo || "Legal and regulatory access details are assigned by the admin.",
+      packageDetails: pkg.packageDetails || "Package details are assigned by the admin.",
+      loadingMinutes: getFinalLoadingMinutes(pkg)
+    }))
   };
 }
 
@@ -805,8 +771,6 @@ function resetInstallFlow() {
   elements.featureActionMessage.classList.remove("show", "ok", "neutral");
   elements.gameInjectMessage.textContent = "";
   elements.gameInjectMessage.classList.remove("show", "ok", "neutral");
-  elements.contactChoicePanel.innerHTML = "";
-  elements.contactChoicePanel.classList.add("hidden");
   setMessage(elements.serialMessage, "");
   setMessage(elements.webCodeMessage, "");
   setMessage(elements.certificateMessage, "");
@@ -892,9 +856,6 @@ function startInstall() {
 
   const code = generateActivationCode();
   elements.activationCodeOutput.value = code;
-  elements.contactChoicePanel.innerHTML = "";
-  elements.contactChoicePanel.classList.add("hidden");
-  setMessage(elements.contactMessage, "");
   elements.serialForm.classList.add("hidden");
   elements.serialVerifiedPanel.classList.add("hidden");
   elements.serialInput.value = "";
@@ -1103,8 +1064,6 @@ function renderPackageList() {
               <span>Expires: ${formatDate(pkg.expiresAt)}</span>
               <span>${featureTotal} feature(s)</span>
               <span>${lockStatus}</span>
-              <span>WhatsApp: ${pkg.whatsappContact ? "Set" : "Empty"}</span>
-              <span>Email: ${pkg.emailContact ? "Set" : "Empty"}</span>
               <span>Web: ${escapeHtml(pkg.webAccessCode)}</span>
               <span>Cert: ${escapeHtml(pkg.certificateCode)}</span>
             </div>
@@ -1136,8 +1095,6 @@ function resetPackageForm() {
   elements.pkgLoadingPreset.value = "60";
   elements.pkgCustomDays.value = "1";
   elements.pkgCustomLoading.value = "60";
-  elements.pkgContact.value = "";
-  elements.pkgEmail.value = "";
   elements.pkgDeviceName.value = "Registered Device";
   elements.pkgLegalInfo.value = "Legal and regulatory access details are assigned by the admin.";
   elements.pkgPackageDetails.value = "Package details are assigned by the admin.";
@@ -1163,8 +1120,7 @@ function fillPackageForm(pkg) {
   elements.pkgActivationCode.value = pkg.activationCode || "";
   elements.pkgWebCode.value = pkg.webAccessCode;
   elements.pkgCertificate.value = pkg.certificateCode;
-  elements.pkgContact.value = pkg.whatsappContact || inferWhatsappContact(pkg.contactInfo) || "";
-  elements.pkgEmail.value = pkg.emailContact || inferEmailContact(pkg.contactInfo) || "";
+  elements.pkgContact.value = pkg.contactInfo || "";
   elements.pkgLegalInfo.value = pkg.legalInfo || "";
   elements.pkgPackageDetails.value = pkg.packageDetails || "";
   const loadingMinutes = getFinalLoadingMinutes(pkg);
@@ -1227,8 +1183,6 @@ function savePackageFromForm(event) {
   });
   const featureIds = $$('input[name="featurePick"]:checked').map((input) => input.value);
   const now = Date.now();
-  const whatsappContact = elements.pkgContact.value.trim();
-  const emailContact = elements.pkgEmail.value.trim();
 
   const packageData = {
     id,
@@ -1245,9 +1199,7 @@ function savePackageFromForm(event) {
     activationCode: elements.pkgActivationCode.value.trim() || generateActivationCode(),
     webAccessCode: elements.pkgWebCode.value.trim(),
     certificateCode: elements.pkgCertificate.value.trim(),
-    contactInfo: whatsappContact || emailContact,
-    whatsappContact,
-    emailContact,
+    contactInfo: elements.pkgContact.value.trim(),
     legalInfo: elements.pkgLegalInfo.value.trim(),
     packageDetails: elements.pkgPackageDetails.value.trim(),
     loadingPreset,
@@ -1472,84 +1424,6 @@ function openOrCopyContact({ contact, label, mode = "auto", messageElement }) {
   });
 }
 
-function getPackageContactChoices(pkg) {
-  const whatsappContact = pkg?.whatsappContact || inferWhatsappContact(pkg?.contactInfo);
-  const emailContact = pkg?.emailContact || inferEmailContact(pkg?.contactInfo);
-  const choices = [];
-
-  if (whatsappContact) {
-    choices.push({
-      channel: "whatsapp",
-      label: "WhatsApp",
-      contact: whatsappContact
-    });
-  }
-
-  if (emailContact) {
-    choices.push({
-      channel: "email",
-      label: "Email",
-      contact: emailContact
-    });
-  }
-
-  if (!choices.length && pkg?.contactInfo) {
-    choices.push({
-      channel: "package",
-      label: "Package Contact",
-      contact: pkg.contactInfo
-    });
-  }
-
-  if (!choices.length && appData.settings?.contactValue) {
-    choices.push({
-      channel: "admin",
-      label: appData.settings.contactLabel || "Admin Contact",
-      contact: appData.settings.contactValue
-    });
-  }
-
-  return choices;
-}
-
-function showPackageContactChoices() {
-  const choices = getPackageContactChoices(getActivePackage());
-
-  if (!choices.length) {
-    elements.contactChoicePanel.innerHTML = "";
-    elements.contactChoicePanel.classList.add("hidden");
-    setMessage(elements.contactMessage, "No contact info set.", "neutral");
-    return;
-  }
-
-  elements.contactChoicePanel.innerHTML = choices
-    .map(
-      (choice) => `
-        <button class="contact-choice-button" type="button" data-contact-channel="${choice.channel}">
-          ${escapeHtml(choice.label)}
-        </button>
-      `
-    )
-    .join("");
-  elements.contactChoicePanel.classList.remove("hidden");
-  setMessage(elements.contactMessage, "Choose WhatsApp or Email.", "neutral");
-}
-
-function openPackageContactChoice(channel) {
-  const choice = getPackageContactChoices(getActivePackage()).find((item) => item.channel === channel);
-  if (!choice) {
-    setMessage(elements.contactMessage, "Contact option not found.", "neutral");
-    return;
-  }
-
-  openOrCopyContact({
-    contact: choice.contact,
-    label: choice.label,
-    mode: "auto",
-    messageElement: elements.contactMessage
-  });
-}
-
 function openSelectedAdminContact() {
   const settings = appData.settings || {};
   openOrCopyContact({
@@ -1644,12 +1518,20 @@ elements.freeFireMaxButton.addEventListener("click", async () => {
   if (ready) showAnimatedMessage(elements.gameInjectMessage, "Free Fire Max Injected", "ok");
 });
 
-elements.contactButton.addEventListener("click", showPackageContactChoices);
+elements.contactButton.addEventListener("click", () => {
+  const pkg = getActivePackage();
+  const contact = pkg?.contactInfo || appData.settings?.contactValue || "";
+  if (!contact) {
+    setMessage(elements.contactMessage, "No contact info set.", "neutral");
+    return;
+  }
 
-elements.contactChoicePanel.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-contact-channel]");
-  if (!button) return;
-  openPackageContactChoice(button.dataset.contactChannel);
+  openOrCopyContact({
+    contact,
+    label: pkg?.contactInfo ? "Package contact" : appData.settings?.contactLabel || "Admin contact",
+    mode: "auto",
+    messageElement: elements.contactMessage
+  });
 });
 
 elements.copyActivationButton.addEventListener("click", async () => {
