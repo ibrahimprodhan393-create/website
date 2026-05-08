@@ -9,7 +9,6 @@ const DATA_FILE = process.env.DATA_FILE || path.join(ROOT_DIR, "data", "store.js
 const DATABASE_URL = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.NEON_DATABASE_URL || "";
 const STORE_ID = "main";
 const DAY_MS = 24 * 60 * 60 * 1000;
-const BUILT_IN_ADMIN_PASSWORD = "ADMIN-2026";
 const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "ADMIN-2026";
 const ADMIN_SESSION_MS = 12 * 60 * 60 * 1000;
 
@@ -421,13 +420,10 @@ async function handleApi(req, res, pathname) {
 
     return withStoreUpdate((data) => {
       const adminUsername = String(data.settings?.adminUsername || "admin").trim();
-      const adminPassword = String(data.settings?.adminPassword || DEFAULT_ADMIN_PASSWORD).trim();
+      const adminPassword = String(data.settings?.adminPassword ?? DEFAULT_ADMIN_PASSWORD).trim();
       const isConfiguredAdmin =
         username.toLowerCase() === adminUsername.toLowerCase() && password === adminPassword;
-      const isDefaultAdmin =
-        username.toLowerCase() === "admin" &&
-        (password === DEFAULT_ADMIN_PASSWORD || password === BUILT_IN_ADMIN_PASSWORD);
-      if (isConfiguredAdmin || isDefaultAdmin) {
+      if (isConfiguredAdmin) {
         return sendJson(res, 200, {
           role: "admin",
           token: createAdminSession(),
@@ -475,6 +471,9 @@ async function handleApi(req, res, pathname) {
     }
     const body = await readJsonBody(req);
     const nextData = normalizeData(body.data || {});
+    if (!String(nextData.settings?.adminPassword || "").trim()) {
+      return sendJson(res, 400, { message: "Admin password cannot be empty" });
+    }
     await writeStore(nextData);
     return sendJson(res, 200, { ok: true, data: nextData });
   }

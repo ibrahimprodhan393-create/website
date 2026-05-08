@@ -3282,6 +3282,56 @@
         padding-top: clamp(24px, 4dvh, 46px) !important;
       }
     </style>
+    <style id="hyper-clean-logo-login">
+      body.login-active .hyper-login {
+        background:
+          radial-gradient(circle at 50% 8%, rgba(154, 44, 255, 0.48), transparent 23dvh),
+          radial-gradient(circle at 50% 48%, rgba(80, 34, 190, 0.26), transparent 34dvh),
+          linear-gradient(90deg, rgba(129, 43, 255, 0.12) 1px, transparent 1px),
+          linear-gradient(0deg, rgba(129, 43, 255, 0.1) 1px, transparent 1px),
+          linear-gradient(180deg, #030008 0%, #130424 44%, #04000b 100%) !important;
+        background-size: auto, auto, 54px 54px, 54px 54px, auto !important;
+      }
+
+      body.login-active .hyper-login::before,
+      body.login-active .hyper-login::after {
+        display: none !important;
+      }
+
+      body.login-active .hyper-logo {
+        width: clamp(112px, 15.5dvh, 168px) !important;
+        height: clamp(86px, 12dvh, 132px) !important;
+        margin-bottom: clamp(4px, 0.9dvh, 10px) !important;
+        overflow: hidden !important;
+        background:
+          linear-gradient(180deg, rgba(6, 0, 18, 0.05), rgba(6, 0, 18, 0.22)),
+          url("assets/LOGO.jpeg") center 6% / 330% auto no-repeat !important;
+        border: 1px solid rgba(201, 126, 255, 0.42) !important;
+        border-radius: 22px !important;
+        box-shadow:
+          inset 0 0 20px rgba(255, 255, 255, 0.06),
+          0 0 26px rgba(169, 68, 255, 0.62),
+          0 10px 28px rgba(0, 0, 0, 0.48) !important;
+        filter: none !important;
+      }
+
+      body.login-active .hyper-logo::before,
+      body.login-active .hyper-logo::after {
+        display: none !important;
+      }
+
+      body.login-active .hyper-logo span {
+        display: none !important;
+      }
+
+      @media (max-height: 700px) {
+        body.login-active .hyper-logo {
+          width: 96px !important;
+          height: 72px !important;
+          border-radius: 18px !important;
+        }
+      }
+    </style>
   </head>
   <body class="login-active">
     <div class="app-shell">

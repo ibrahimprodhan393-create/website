@@ -572,7 +572,22 @@ function formatCountdown(ms) {
   const minutes = Math.floor((safeSeconds % 3600) / 60);
   const seconds = safeSeconds % 60;
   const pad = (value) => String(value).padStart(2, "0");
-  return `${days}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+  return { days: String(days), hours: pad(hours), minutes: pad(minutes), seconds: pad(seconds) };
+}
+
+function renderCountdownDisplay(element, remaining) {
+  if (remaining <= 0) {
+    element.textContent = "Expired";
+    return;
+  }
+
+  const parts = formatCountdown(remaining);
+  element.innerHTML = `
+    <span class="countdown-cell"><strong>${parts.days}</strong><small>Days</small></span>
+    <span class="countdown-cell"><strong>${parts.hours}</strong><small>Hours</small></span>
+    <span class="countdown-cell"><strong>${parts.minutes}</strong><small>Minutes</small></span>
+    <span class="countdown-cell"><strong>${parts.seconds}</strong><small>Seconds</small></span>
+  `;
 }
 
 function formatDate(timestamp) {
@@ -694,9 +709,9 @@ function startSubscriptionCountdown(pkg) {
 
   const updateCountdown = () => {
     const remaining = Number(pkg.expiresAt) - Date.now();
-    elements.subscriptionCountdown.textContent = remaining > 0 ? formatCountdown(remaining) : "Expired";
+    renderCountdownDisplay(elements.subscriptionCountdown, remaining);
     elements.subscriptionCountdownText.textContent =
-      remaining > 0 ? "Reverse counting until package expiry." : "This package access has expired.";
+      remaining > 0 ? "Live reverse countdown until package expiry." : "This package access has expired.";
     elements.subscriptionCountdown.classList.toggle("is-expired", remaining <= 0);
 
     if (remaining <= 0) {
@@ -1352,9 +1367,17 @@ function renderAdminSettings() {
 
 function saveAdminSettings(event) {
   event.preventDefault();
+  const nextAdminUsername = elements.adminUsernameInput.value.trim() || "admin";
+  const nextAdminPassword = elements.adminPasswordInput.value.trim();
+
+  if (!nextAdminPassword) {
+    setMessage(elements.adminSettingsMessage, "Admin password cannot be empty");
+    return;
+  }
+
   appData.settings = {
-    adminUsername: elements.adminUsernameInput.value.trim() || "admin",
-    adminPassword: elements.adminPasswordInput.value.trim(),
+    adminUsername: nextAdminUsername,
+    adminPassword: nextAdminPassword,
     contactLabel: elements.adminContactLabel.value.trim(),
     contactValue: elements.adminContactValue.value.trim(),
     contactMode: elements.adminContactMode.value
@@ -1519,12 +1542,11 @@ elements.loginForm.addEventListener("submit", async (event) => {
   if (handledByServer) return;
 
   const adminUsername = String(appData.settings?.adminUsername || "admin").trim();
-  const adminPassword = (appData.settings?.adminPassword || DEFAULT_ADMIN_PASSWORD).trim();
+  const adminPassword = String(appData.settings?.adminPassword ?? DEFAULT_ADMIN_PASSWORD).trim();
   const isConfiguredAdmin =
     username.toLowerCase() === adminUsername.toLowerCase() && password === adminPassword;
-  const isDefaultAdmin = username.toLowerCase() === "admin" && password === DEFAULT_ADMIN_PASSWORD;
 
-  if (isConfiguredAdmin || isDefaultAdmin) {
+  if (isConfiguredAdmin) {
     adminAuthenticated = true;
     activePackageId = null;
     elements.loginUsername.value = "";
