@@ -2245,6 +2245,17 @@ button.is-loading::before {
   min-height: 16px;
 }
 
+.checkbox-line .feature-icon {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  font-size: 0.66rem;
+}
+
+.checkbox-line span:last-child {
+  min-width: 0;
+}
+
 .list-stack {
   display: grid;
   gap: 10px;

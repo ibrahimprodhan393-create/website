@@ -11,6 +11,7 @@ const STORE_ID = "main";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "ADMIN-2026";
 const ADMIN_SESSION_MS = 12 * 60 * 60 * 1000;
+const MAX_JSON_BODY_BYTES = 5_000_000;
 
 const sessions = new Map();
 let writeQueue = Promise.resolve();
@@ -370,6 +371,20 @@ function userPackage(pkg) {
   };
 }
 
+function userFeaturesForPackage(data, pkg) {
+  const selectedIds = new Set(Array.isArray(pkg?.featureIds) ? pkg.featureIds : []);
+  return (data.features || [])
+    .filter((feature) => selectedIds.has(feature.id))
+    .map((feature) => ({
+      id: feature.id,
+      name: feature.name,
+      icon: feature.icon || "",
+      image: feature.image || "",
+      description: feature.description || "",
+      status: feature.status || "Active"
+    }));
+}
+
 function isExpired(pkg) {
   return Date.now() > Number(pkg.expiresAt);
 }
@@ -409,7 +424,7 @@ async function readJsonBody(req) {
   let raw = "";
   for await (const chunk of req) {
     raw += chunk;
-    if (raw.length > 1_000_000) {
+    if (raw.length > MAX_JSON_BODY_BYTES) {
       throw new Error("Request body too large");
     }
   }
@@ -480,8 +495,33 @@ async function handleApi(req, res, pathname) {
 
       return sendJson(res, 200, {
         role: "user",
-        package: userPackage(pkg)
+        package: userPackage(pkg),
+        features: userFeaturesForPackage(data, pkg),
+        settings: publicSettings(data.settings)
       });
+    });
+  }
+
+  if (req.method === "POST" && pathname === "/api/user/package") {
+    const body = await readJsonBody(req);
+    const packageId = String(body.packageId || "").trim();
+    const deviceId = String(body.deviceId || "").trim();
+    const data = await readStore();
+    const pkg = data.packages.find((item) => item.id === packageId);
+
+    if (!pkg) {
+      return sendJson(res, 404, { message: "Package not found" });
+    }
+
+    const accessError = verifyPackageDevice(pkg, deviceId);
+    if (accessError) {
+      return sendJson(res, accessError.includes("Already") ? 409 : 403, { message: accessError });
+    }
+
+    return sendJson(res, 200, {
+      package: userPackage(pkg),
+      features: userFeaturesForPackage(data, pkg),
+      settings: publicSettings(data.settings)
     });
   }
 

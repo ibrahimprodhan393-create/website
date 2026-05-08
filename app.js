@@ -9,6 +9,9 @@ const MAX_FINAL_LOADING_MINUTES = 80;
 const ACTION_DELAY_MIN_MS = 2000;
 const ACTION_DELAY_MAX_MS = 5000;
 const FINAL_PHASE_MINUTES = 10;
+const USER_PACKAGE_SYNC_MS = 12000;
+const FEATURE_IMAGE_MAX_SIZE = 256;
+const FEATURE_IMAGE_QUALITY = 0.86;
 const FINAL_PHASE_MESSAGES = [
   "Security Protection Checking",
   "Device Module Checking",
@@ -28,6 +31,7 @@ let appData = loadData();
 let activePackageId = null;
 let activeTimer = null;
 let countdownTimer = null;
+let activePackageSyncTimer = null;
 let adminAuthenticated = false;
 let adminToken = sessionStorage.getItem(ADMIN_TOKEN_KEY) || "";
 let backendOnline = false;
@@ -365,14 +369,18 @@ function normalizeData(data) {
     featureStateDefaultMode: "deactivated",
     features: (data.features || defaults.features).map((feature) => ({
       ...feature,
-      icon: feature.icon || feature.name.slice(0, 2).toUpperCase(),
-      image: feature.image || ""
+      name: feature.name || "Feature",
+      icon: feature.icon || String(feature.name || "FT").slice(0, 2).toUpperCase(),
+      image: feature.image || "",
+      description: feature.description || "",
+      status: feature.status || "Active"
     })),
     userFeatureStates: hasDeactivatedFeatureDefaults ? data.userFeatureStates || {} : {},
     packages: (data.packages || defaults.packages).map((pkg) => ({
       ...pkg,
       username: cleanAccessValue(pkg.username) || makeDefaultUsername(pkg),
       password: cleanAccessValue(pkg.password),
+      featureIds: Array.isArray(pkg.featureIds) ? pkg.featureIds : [],
       deviceName: pkg.deviceName || "Registered Device",
       legalInfo: pkg.legalInfo || "Legal and regulatory access details are assigned by the admin.",
       packageDetails: pkg.packageDetails || "Package details are assigned by the admin.",
@@ -492,6 +500,50 @@ function mergeActivePackage(pkg) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
 }
 
+function normalizeFeatureData(feature) {
+  const name = String(feature?.name || "Feature").trim() || "Feature";
+  return {
+    id: feature?.id || makeId("feat"),
+    name,
+    icon: String(feature?.icon || name.slice(0, 2).toUpperCase()).trim(),
+    image: feature?.image || "",
+    description: feature?.description || "",
+    status: feature?.status || "Active"
+  };
+}
+
+function mergeServerFeatures(features = []) {
+  if (!Array.isArray(features) || !features.length) return;
+
+  const byId = new Map(appData.features.map((feature) => [feature.id, feature]));
+  features.map(normalizeFeatureData).forEach((feature) => {
+    byId.set(feature.id, {
+      ...(byId.get(feature.id) || {}),
+      ...feature
+    });
+  });
+  appData.features = Array.from(byId.values());
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+}
+
+function applyServerUserPayload(payload = {}) {
+  if (payload.settings) {
+    appData.settings = {
+      ...appData.settings,
+      ...payload.settings
+    };
+  }
+
+  mergeServerFeatures(payload.features || []);
+
+  if (!payload.package) return null;
+
+  const pkg = normalizeData({ ...appData, packages: [payload.package] }).packages[0];
+  activePackageId = pkg.id;
+  mergeActivePackage(pkg);
+  return getActivePackage() || pkg;
+}
+
 async function loginWithServer(username, password) {
   try {
     const payload = await apiRequest("/api/login", {
@@ -517,9 +569,7 @@ async function loginWithServer(username, password) {
     }
 
     if (payload.role === "user" && payload.package) {
-      const pkg = normalizeData({ ...appData, packages: [payload.package] }).packages[0];
-      activePackageId = pkg.id;
-      mergeActivePackage(pkg);
+      const pkg = applyServerUserPayload(payload);
       setMessage(elements.loginMessage, "");
       renderDashboard(pkg);
       return true;
@@ -706,6 +756,7 @@ function updatePageMode() {
 function showLoginGate(message = "") {
   clearActiveTimer();
   clearCountdownTimer();
+  clearActivePackageSyncTimer();
   activePackageId = null;
   elements.dashboardView.classList.add("hidden");
   elements.loginView.classList.remove("hidden");
@@ -728,11 +779,53 @@ function clearCountdownTimer() {
   }
 }
 
+function clearActivePackageSyncTimer() {
+  if (activePackageSyncTimer) {
+    window.clearInterval(activePackageSyncTimer);
+    activePackageSyncTimer = null;
+  }
+}
+
+async function refreshActivePackageFromServer() {
+  if (!activePackageId || adminAuthenticated) return;
+
+  try {
+    const payload = await apiRequest("/api/user/package", {
+      method: "POST",
+      body: {
+        packageId: activePackageId,
+        deviceId
+      },
+      token: ""
+    });
+    const pkg = applyServerUserPayload(payload);
+    if (pkg && !elements.dashboardView.classList.contains("hidden")) {
+      renderDashboardDetails(pkg);
+    }
+  } catch (error) {
+    if (isMissingApiError(error)) {
+      clearActivePackageSyncTimer();
+      return;
+    }
+
+    if (error.status) {
+      showLoginGate(error.message || "Access expired");
+    }
+  }
+}
+
+function startActivePackageSync() {
+  clearActivePackageSyncTimer();
+  if (!backendOnline || !activePackageId) return;
+  activePackageSyncTimer = window.setInterval(refreshActivePackageFromServer, USER_PACKAGE_SYNC_MS);
+}
+
 function startSubscriptionCountdown(pkg) {
   clearCountdownTimer();
 
   const updateCountdown = () => {
-    const remaining = Number(pkg.expiresAt) - Date.now();
+    const currentPkg = getActivePackage() || pkg;
+    const remaining = Number(currentPkg.expiresAt) - Date.now();
     renderCountdownDisplay(elements.subscriptionCountdown, remaining);
     elements.subscriptionCountdownText.textContent =
       remaining > 0 ? "Live reverse countdown until package expiry." : "This package access has expired.";
@@ -740,6 +833,7 @@ function startSubscriptionCountdown(pkg) {
 
     if (remaining <= 0) {
       clearCountdownTimer();
+      showLoginGate("Access expired");
     }
   };
 
@@ -817,11 +911,8 @@ function renderFeatureModules(pkg) {
     .join("");
 }
 
-function renderDashboard(pkg) {
+function renderDashboardDetails(pkg) {
   const status = isExpired(pkg) ? "Expired" : pkg.status;
-
-  elements.loginView.classList.add("hidden");
-  elements.dashboardView.classList.remove("hidden");
   elements.dashboardTitle.textContent = "Welcome to the Hyper Regedit Web Portal";
   elements.dashboardSubtitle.textContent = `${pkg.name} access is ready. Click the button below to install.`;
   elements.packageName.textContent = pkg.name;
@@ -832,7 +923,14 @@ function renderDashboard(pkg) {
   elements.dashboardPackageDetails.textContent = pkg.packageDetails || "Package details are assigned by the admin.";
   updateStatusPill(elements.packageStatus, status);
   renderFeatureModules(pkg);
+}
+
+function renderDashboard(pkg) {
+  elements.loginView.classList.add("hidden");
+  elements.dashboardView.classList.remove("hidden");
+  renderDashboardDetails(pkg);
   startSubscriptionCountdown(pkg);
+  startActivePackageSync();
   saveData();
 
   resetInstallFlow();
@@ -1063,7 +1161,28 @@ function readImageFile(file) {
     }
 
     const reader = new FileReader();
-    reader.addEventListener("load", () => resolve(String(reader.result || "")));
+    reader.addEventListener("load", () => {
+      const source = String(reader.result || "");
+      const image = new Image();
+      image.addEventListener("load", () => {
+        const scale = Math.min(1, FEATURE_IMAGE_MAX_SIZE / Math.max(image.width, image.height));
+        const width = Math.max(1, Math.round(image.width * scale));
+        const height = Math.max(1, Math.round(image.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d");
+        context.drawImage(image, 0, 0, width, height);
+
+        try {
+          resolve(canvas.toDataURL("image/webp", FEATURE_IMAGE_QUALITY));
+        } catch (error) {
+          resolve(canvas.toDataURL("image/png"));
+        }
+      });
+      image.addEventListener("error", () => reject(new Error("Image preview failed.")));
+      image.src = source;
+    });
     reader.addEventListener("error", () => reject(new Error("Image upload failed.")));
     reader.readAsDataURL(file);
   });
@@ -1080,6 +1199,7 @@ function renderFeaturePicker(selectedIds = []) {
       (feature) => `
         <label class="checkbox-line">
           <input type="checkbox" name="featurePick" value="${feature.id}" ${selectedIds.includes(feature.id) ? "checked" : ""}>
+          ${renderFeatureIconMarkup(feature)}
           <span>${escapeHtml(feature.name)}${feature.status === "Disabled" ? " (Disabled)" : ""}</span>
         </label>
       `
@@ -1324,6 +1444,10 @@ function savePackageFromForm(event) {
 
   saveData();
   renderAdmin();
+  if (activePackageId === id) {
+    const activePackage = getActivePackage();
+    if (activePackage) renderDashboardDetails(activePackage);
+  }
   resetPackageForm();
   setMessage(elements.packageFormMessage, existing ? "Package updated." : "Package created.", "ok");
 }
@@ -1380,6 +1504,10 @@ async function saveFeatureFromForm(event) {
 
   saveData();
   renderAdmin();
+  if (activePackageId) {
+    const activePackage = getActivePackage();
+    if (activePackage) renderDashboardDetails(activePackage);
+  }
   resetFeatureForm();
   setMessage(elements.featureFormMessage, existing ? "Feature updated." : "Feature added.", "ok");
 }
@@ -1706,6 +1834,7 @@ elements.logoutButton.addEventListener("click", () => {
   activePackageId = null;
   clearActiveTimer();
   clearCountdownTimer();
+  clearActivePackageSyncTimer();
   elements.loginUsername.value = "";
   elements.loginPassword.value = "";
   elements.loginView.classList.remove("hidden");
@@ -1925,7 +2054,10 @@ elements.featureList.addEventListener("click", (event) => {
     feature.status = feature.status === "Active" ? "Disabled" : "Active";
     saveData();
     renderAdmin();
-    if (activePackageId) renderDashboard(getActivePackage());
+    if (activePackageId) {
+      const activePackage = getActivePackage();
+      if (activePackage) renderDashboardDetails(activePackage);
+    }
   }
 
   if (button.dataset.featureAction === "delete") {
@@ -1937,7 +2069,10 @@ elements.featureList.addEventListener("click", (event) => {
     }));
     saveData();
     renderAdmin();
-    if (activePackageId) renderDashboard(getActivePackage());
+    if (activePackageId) {
+      const activePackage = getActivePackage();
+      if (activePackage) renderDashboardDetails(activePackage);
+    }
   }
 });
 
@@ -1956,7 +2091,10 @@ elements.packageList.addEventListener("click", async (event) => {
     pkg.status = pkg.status === "Active" ? "Disabled" : "Active";
     saveData();
     renderPackageList();
-    if (activePackageId === pkg.id) renderDashboard(pkg);
+    if (activePackageId === pkg.id) {
+      if (pkg.status !== "Active") showLoginGate("Access disabled");
+      else renderDashboardDetails(pkg);
+    }
   }
 
   if (button.dataset.packageAction === "unlock") {
@@ -1993,6 +2131,7 @@ elements.packageList.addEventListener("click", async (event) => {
     appData.packages = appData.packages.filter((item) => item.id !== pkg.id);
     if (activePackageId === pkg.id) {
       activePackageId = null;
+      clearActivePackageSyncTimer();
       elements.loginView.classList.remove("hidden");
       elements.dashboardView.classList.add("hidden");
       updatePageMode();
@@ -2007,6 +2146,7 @@ elements.resetDemoButton.addEventListener("click", () => {
   appData = seedData();
   saveData();
   activePackageId = null;
+  clearActivePackageSyncTimer();
   elements.loginView.classList.remove("hidden");
   elements.dashboardView.classList.add("hidden");
   updatePageMode();
