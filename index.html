@@ -2623,6 +2623,656 @@
         }
       }
     </style>
+    <style id="hyper-final-fixed-login">
+      html.login-active,
+      body.login-active {
+        width: 100% !important;
+        height: 100dvh !important;
+        min-height: 100dvh !important;
+        overflow: hidden !important;
+        overscroll-behavior: none !important;
+        color: #ffffff !important;
+        background: #020006 !important;
+      }
+
+      body.login-active .app-shell,
+      body.login-active main,
+      body.login-active #userView.active,
+      body.login-active #loginView {
+        width: 100% !important;
+        height: 100dvh !important;
+        min-height: 100dvh !important;
+        overflow: hidden !important;
+      }
+
+      body.login-active .topbar,
+      body.login-active .login-benefits,
+      body.login-active .powered-line,
+      body.login-active .secure-note p,
+      body.login-active .secure-note .shield-mark,
+      body.login-active .circuit-rail,
+      body.login-active .cyber-frame::before,
+      body.login-active .cyber-frame::after {
+        display: none !important;
+      }
+
+      body.login-active .hyper-login {
+        position: fixed !important;
+        inset: 0 !important;
+        display: grid !important;
+        grid-template-rows: minmax(0, 1fr) auto !important;
+        justify-items: center !important;
+        width: 100vw !important;
+        height: 100dvh !important;
+        min-height: 0 !important;
+        padding: clamp(7px, 1.4dvh, 18px) 14px clamp(7px, 1.4dvh, 14px) !important;
+        overflow: hidden !important;
+        background:
+          radial-gradient(circle at 50% 12%, rgba(154, 44, 255, 0.62), transparent 26dvh),
+          radial-gradient(circle at 14% 42%, rgba(125, 37, 255, 0.38), transparent 25dvh),
+          radial-gradient(circle at 86% 42%, rgba(125, 37, 255, 0.38), transparent 25dvh),
+          linear-gradient(90deg, rgba(129, 43, 255, 0.16) 1px, transparent 1px),
+          linear-gradient(0deg, rgba(129, 43, 255, 0.13) 1px, transparent 1px),
+          linear-gradient(180deg, #04000b 0%, #16052f 42%, #05000d 100%) !important;
+        background-size: auto, auto, auto, 52px 52px, 52px 52px, auto !important;
+      }
+
+      body.login-active .hyper-login::before,
+      body.login-active .hyper-login::after {
+        content: "" !important;
+        position: absolute !important;
+        bottom: 0 !important;
+        display: block !important;
+        width: min(24vw, 160px) !important;
+        height: 72dvh !important;
+        opacity: 0.8 !important;
+        pointer-events: none !important;
+        background:
+          linear-gradient(180deg, transparent 0 10%, rgba(172, 68, 255, 0.52) 10% 11%, transparent 11% 100%),
+          repeating-linear-gradient(90deg, transparent 0 18px, rgba(170, 76, 255, 0.32) 19px 21px, transparent 22px 42px),
+          linear-gradient(180deg, transparent, rgba(47, 8, 110, 0.86)) !important;
+        clip-path: polygon(0 100%, 0 44%, 14% 44%, 14% 25%, 32% 25%, 32% 58%, 50% 58%, 50% 14%, 70% 14%, 70% 39%, 86% 39%, 86% 100%) !important;
+      }
+
+      body.login-active .hyper-login::before {
+        left: 0 !important;
+      }
+
+      body.login-active .hyper-login::after {
+        right: 0 !important;
+        transform: scaleX(-1) !important;
+      }
+
+      body.login-active .cyber-frame {
+        position: relative !important;
+        z-index: 2 !important;
+        display: grid !important;
+        grid-template-rows: minmax(118px, 30dvh) minmax(0, 1fr) !important;
+        justify-items: center !important;
+        align-items: stretch !important;
+        width: min(100%, 620px) !important;
+        height: calc(100dvh - clamp(40px, 6dvh, 62px)) !important;
+        min-height: 0 !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+      }
+
+      body.login-active .hyper-hero {
+        display: grid !important;
+        grid-template-rows: minmax(0, 1fr) auto auto !important;
+        justify-items: center !important;
+        align-items: end !important;
+        width: 100% !important;
+        min-height: 0 !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        text-align: center !important;
+      }
+
+      body.login-active .hyper-logo {
+        position: relative !important;
+        display: grid !important;
+        place-items: center !important;
+        width: clamp(74px, 13dvh, 136px) !important;
+        height: clamp(66px, 11.5dvh, 120px) !important;
+        margin: 0 0 clamp(3px, 0.8dvh, 8px) !important;
+        filter: drop-shadow(0 0 26px rgba(169, 68, 255, 0.95)) !important;
+      }
+
+      body.login-active .hyper-logo::before {
+        content: "" !important;
+        position: absolute !important;
+        inset: 0 !important;
+        background: linear-gradient(135deg, #fbfbff 0%, #171222 42%, #8830ff 72%, #ffffff 100%) !important;
+        clip-path: polygon(22% 8%, 80% 8%, 66% 38%, 90% 38%, 40% 94%, 52% 57%, 18% 57%) !important;
+        border: 0 !important;
+      }
+
+      body.login-active .hyper-logo::after {
+        content: "" !important;
+        position: absolute !important;
+        inset: -13px !important;
+        border: 3px solid rgba(173, 70, 255, 0.55) !important;
+        border-left-color: transparent !important;
+        border-radius: 50% !important;
+        background: transparent !important;
+        transform: rotate(-18deg) !important;
+      }
+
+      body.login-active .hyper-logo span {
+        display: none !important;
+      }
+
+      body.login-active .hyper-hero h2 {
+        display: block !important;
+        margin: 0 !important;
+        color: #ffffff !important;
+        font-family: "Segoe UI", Arial, sans-serif !important;
+        font-size: clamp(1.8rem, 5.5dvh, 4.25rem) !important;
+        line-height: 0.95 !important;
+        font-weight: 950 !important;
+        letter-spacing: 0.04em !important;
+        text-shadow: 0 0 16px rgba(190, 90, 255, 0.85), 0 10px 32px rgba(0, 0, 0, 0.9) !important;
+      }
+
+      body.login-active .hyper-hero h2 span {
+        display: inline !important;
+        color: #a736ff !important;
+        -webkit-text-fill-color: #a736ff !important;
+      }
+
+      body.login-active .hyper-hero p {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: clamp(8px, 2vw, 16px) !important;
+        margin: clamp(4px, 1dvh, 12px) 0 clamp(5px, 1dvh, 10px) !important;
+        color: rgba(255, 255, 255, 0.82) !important;
+        font-size: clamp(0.72rem, 1.7dvh, 1.05rem) !important;
+        font-weight: 800 !important;
+        letter-spacing: clamp(0.18em, 1vw, 0.45em) !important;
+        white-space: nowrap !important;
+      }
+
+      body.login-active .hyper-hero p span {
+        display: inline-block !important;
+        width: 6px !important;
+        height: 6px !important;
+        background: #a736ff !important;
+        border-radius: 999px !important;
+        box-shadow: 0 0 14px #a736ff !important;
+      }
+
+      body.login-active .hyper-card.login-panel {
+        position: relative !important;
+        inset: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        width: min(100%, 560px) !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        margin: 0 auto !important;
+        padding: clamp(42px, 6.2dvh, 74px) clamp(18px, 4vw, 36px) clamp(14px, 2.4dvh, 26px) !important;
+        color: #ffffff !important;
+        background:
+          linear-gradient(180deg, rgba(12, 5, 34, 0.94), rgba(4, 1, 16, 0.97)),
+          radial-gradient(circle at 50% 0%, rgba(165, 53, 255, 0.28), transparent 48%) !important;
+        border: 2px solid rgba(183, 70, 255, 0.86) !important;
+        border-radius: clamp(22px, 4dvh, 34px) !important;
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+          0 0 30px rgba(159, 44, 255, 0.72),
+          0 24px 70px rgba(0, 0, 0, 0.74) !important;
+        backdrop-filter: blur(10px) !important;
+      }
+
+      body.login-active .hyper-card.login-panel::before {
+        content: "" !important;
+        position: absolute !important;
+        inset: 18px 32px auto !important;
+        display: block !important;
+        height: clamp(24px, 4.2dvh, 44px) !important;
+        background:
+          linear-gradient(90deg, transparent, rgba(156, 52, 255, 0.42), transparent),
+          repeating-linear-gradient(90deg, transparent 0 28px, rgba(175, 78, 255, 0.18) 29px 31px) !important;
+        border-top: 1px solid rgba(176, 72, 255, 0.36) !important;
+        opacity: 0.75 !important;
+        pointer-events: none !important;
+      }
+
+      body.login-active .lock-orb {
+        position: absolute !important;
+        top: clamp(-39px, -4.8dvh, -28px) !important;
+        left: 50% !important;
+        display: grid !important;
+        place-items: center !important;
+        width: clamp(58px, 8dvh, 90px) !important;
+        height: clamp(58px, 8dvh, 90px) !important;
+        margin: 0 !important;
+        background: rgba(14, 6, 39, 0.95) !important;
+        border: 1px solid rgba(193, 102, 255, 0.72) !important;
+        border-radius: clamp(16px, 2.6dvh, 22px) !important;
+        box-shadow: 0 0 28px rgba(167, 54, 255, 0.84) !important;
+        transform: translateX(-50%) !important;
+      }
+
+      body.login-active .lock-orb span {
+        position: relative !important;
+        display: block !important;
+        width: clamp(24px, 3.4dvh, 38px) !important;
+        height: clamp(28px, 3.8dvh, 44px) !important;
+        border: clamp(3px, 0.48dvh, 4px) solid #c691ff !important;
+        border-top: 0 !important;
+        border-radius: 8px 8px 16px 16px !important;
+        background: transparent !important;
+      }
+
+      body.login-active .lock-orb span::before {
+        content: "" !important;
+        position: absolute !important;
+        left: 50% !important;
+        top: clamp(-16px, -1.9dvh, -11px) !important;
+        display: block !important;
+        width: clamp(20px, 2.7dvh, 30px) !important;
+        height: clamp(16px, 2.1dvh, 24px) !important;
+        border: clamp(3px, 0.48dvh, 4px) solid #c691ff !important;
+        border-bottom: 0 !important;
+        border-radius: 18px 18px 0 0 !important;
+        background: transparent !important;
+        transform: translateX(-50%) !important;
+      }
+
+      body.login-active .lock-orb span::after {
+        content: "" !important;
+        position: absolute !important;
+        left: 50% !important;
+        top: 43% !important;
+        display: block !important;
+        width: 5px !important;
+        height: 10px !important;
+        background: #c691ff !important;
+        border-radius: 6px !important;
+        transform: translateX(-50%) !important;
+      }
+
+      body.login-active .login-intro {
+        display: block !important;
+        text-align: center !important;
+      }
+
+      body.login-active .login-intro h3 {
+        margin: 0 0 clamp(5px, 0.9dvh, 10px) !important;
+        color: #ffffff !important;
+        font-family: "Segoe UI", Arial, sans-serif !important;
+        font-size: clamp(1.15rem, 3dvh, 1.9rem) !important;
+        font-weight: 950 !important;
+        letter-spacing: 0.16em !important;
+        text-shadow: 0 0 18px rgba(185, 86, 255, 0.82) !important;
+      }
+
+      body.login-active .login-intro p {
+        margin: 0 0 clamp(14px, 2dvh, 24px) !important;
+        color: rgba(255, 255, 255, 0.76) !important;
+        font-size: clamp(0.78rem, 1.75dvh, 1rem) !important;
+      }
+
+      body.login-active #loginForm {
+        position: relative !important;
+        inset: auto !important;
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      body.login-active .login-field-label {
+        position: static !important;
+        display: block !important;
+        width: auto !important;
+        height: auto !important;
+        margin: 0 0 clamp(6px, 0.9dvh, 10px) !important;
+        overflow: visible !important;
+        clip: auto !important;
+        color: #ffffff !important;
+        font-size: clamp(0.7rem, 1.45dvh, 0.86rem) !important;
+        font-weight: 900 !important;
+        letter-spacing: 0.08em !important;
+        text-align: left !important;
+      }
+
+      body.login-active #loginForm > .sr-only {
+        position: absolute !important;
+        width: 1px !important;
+        height: 1px !important;
+        overflow: hidden !important;
+        clip: rect(0, 0, 0, 0) !important;
+      }
+
+      body.login-active .password-shell {
+        position: relative !important;
+        left: auto !important;
+        top: auto !important;
+        display: grid !important;
+        grid-template-columns: clamp(30px, 4.4dvh, 42px) minmax(0, 1fr) clamp(42px, 5dvh, 52px) !important;
+        align-items: center !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: clamp(46px, 6.4dvh, 66px) !important;
+        margin: 0 0 clamp(10px, 1.65dvh, 20px) !important;
+        padding: 0 clamp(10px, 2vw, 14px) !important;
+        background: rgba(3, 1, 15, 0.88) !important;
+        border: 1px solid rgba(174, 48, 255, 0.92) !important;
+        border-radius: 10px !important;
+        box-shadow: inset 0 0 18px rgba(122, 29, 255, 0.23), 0 0 20px rgba(142, 31, 255, 0.36) !important;
+      }
+
+      body.login-active .username-shell {
+        grid-template-columns: clamp(30px, 4.4dvh, 42px) minmax(0, 1fr) !important;
+      }
+
+      body.login-active #loginForm > .password-shell:not(.username-shell) {
+        top: auto !important;
+      }
+
+      body.login-active .password-shell input {
+        width: 100% !important;
+        min-height: clamp(44px, 6dvh, 62px) !important;
+        height: auto !important;
+        padding: 0 !important;
+        color: #ffffff !important;
+        background: transparent !important;
+        border: 0 !important;
+        outline: 0 !important;
+        box-shadow: none !important;
+        font-size: clamp(0.82rem, 1.8dvh, 1rem) !important;
+        font-weight: 800 !important;
+      }
+
+      body.login-active .password-shell input::placeholder {
+        color: rgba(255, 255, 255, 0.5) !important;
+      }
+
+      body.login-active .input-user,
+      body.login-active .input-lock {
+        position: relative !important;
+        display: block !important;
+        width: clamp(22px, 3.2dvh, 28px) !important;
+        height: clamp(22px, 3.2dvh, 28px) !important;
+        background: transparent !important;
+        border: 0 !important;
+      }
+
+      body.login-active .input-user::before {
+        content: "" !important;
+        position: absolute !important;
+        left: 25% !important;
+        top: 0 !important;
+        width: 42% !important;
+        height: 42% !important;
+        border: 3px solid #be91ff !important;
+        border-radius: 50% !important;
+      }
+
+      body.login-active .input-user::after {
+        content: "" !important;
+        position: absolute !important;
+        left: 3px !important;
+        bottom: 1px !important;
+        width: 75% !important;
+        height: 48% !important;
+        border: 3px solid #be91ff !important;
+        border-bottom: 0 !important;
+        border-radius: 18px 18px 0 0 !important;
+      }
+
+      body.login-active .input-lock {
+        width: clamp(20px, 2.9dvh, 24px) !important;
+        height: clamp(18px, 2.6dvh, 22px) !important;
+        border: 3px solid #be91ff !important;
+        border-radius: 5px !important;
+      }
+
+      body.login-active .input-lock::before {
+        content: "" !important;
+        position: absolute !important;
+        left: 50% !important;
+        top: -15px !important;
+        width: 68% !important;
+        height: 70% !important;
+        border: 3px solid #be91ff !important;
+        border-bottom: 0 !important;
+        border-radius: 12px 12px 0 0 !important;
+        transform: translateX(-50%) !important;
+      }
+
+      body.login-active .input-lock::after {
+        content: "" !important;
+        position: absolute !important;
+        left: 50% !important;
+        top: 35% !important;
+        width: 4px !important;
+        height: 8px !important;
+        background: #be91ff !important;
+        border-radius: 4px !important;
+        transform: translateX(-50%) !important;
+      }
+
+      body.login-active .password-toggle {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: auto !important;
+        min-height: 34px !important;
+        padding: 0 4px !important;
+        color: #d68cff !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        font-size: clamp(0.68rem, 1.4dvh, 0.78rem) !important;
+        font-weight: 900 !important;
+        overflow: visible !important;
+      }
+
+      body.login-active .login-options {
+        position: static !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        justify-items: start !important;
+        gap: clamp(4px, 0.9dvh, 8px) !important;
+        width: 100% !important;
+        height: auto !important;
+        margin: clamp(-4px, -0.4dvh, 0px) 0 clamp(10px, 1.7dvh, 18px) !important;
+      }
+
+      body.login-active .remember-line {
+        position: relative !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 9px !important;
+        width: auto !important;
+        height: auto !important;
+        color: #ffffff !important;
+        font-size: clamp(0.74rem, 1.5dvh, 0.9rem) !important;
+        font-weight: 900 !important;
+        letter-spacing: 0.04em !important;
+      }
+
+      body.login-active .remember-line input {
+        position: static !important;
+        width: clamp(18px, 2.5dvh, 22px) !important;
+        height: clamp(18px, 2.5dvh, 22px) !important;
+        min-height: clamp(18px, 2.5dvh, 22px) !important;
+        margin: 0 !important;
+        opacity: 1 !important;
+        accent-color: #a736ff !important;
+      }
+
+      body.login-active .remember-line span,
+      body.login-active .login-options p,
+      body.login-active .login-admin-link {
+        color: rgba(255, 255, 255, 0.86) !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+      }
+
+      body.login-active .login-options p {
+        justify-self: center !important;
+        display: block !important;
+        margin: 0 !important;
+        font-size: clamp(0.76rem, 1.65dvh, 0.95rem) !important;
+      }
+
+      body.login-active .login-admin-link {
+        font-weight: 950 !important;
+      }
+
+      body.login-active .login-submit {
+        position: relative !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 16px !important;
+        width: 100% !important;
+        min-height: clamp(48px, 6.8dvh, 72px) !important;
+        padding: 0 18px !important;
+        color: #ffffff !important;
+        background:
+          linear-gradient(90deg, rgba(110, 21, 255, 0.9), rgba(51, 5, 110, 0.84)),
+          linear-gradient(135deg, transparent 0 7%, rgba(255, 255, 255, 0.16) 7% 9%, transparent 9% 91%, rgba(255, 255, 255, 0.14) 91% 93%, transparent 93%) !important;
+        border: 2px solid #b636ff !important;
+        border-radius: 10px !important;
+        box-shadow: inset 0 0 24px rgba(221, 117, 255, 0.44), 0 0 26px rgba(175, 54, 255, 0.94) !important;
+        overflow: visible !important;
+        font-size: clamp(1.05rem, 2.8dvh, 1.7rem) !important;
+        font-weight: 950 !important;
+        letter-spacing: 0.18em !important;
+      }
+
+      body.login-active .login-submit span {
+        color: #dca9ff !important;
+      }
+
+      body.login-active #loginMessage {
+        position: static !important;
+        width: 100% !important;
+        min-height: clamp(18px, 2.3dvh, 24px) !important;
+        margin: clamp(7px, 1.2dvh, 12px) 0 0 !important;
+        color: #ff8fbf !important;
+        font-size: clamp(0.74rem, 1.55dvh, 0.9rem) !important;
+        font-weight: 900 !important;
+        text-align: center !important;
+        text-shadow: 0 0 12px rgba(180, 46, 255, 0.78) !important;
+      }
+
+      body.login-active #loginMessage.ok,
+      body.login-active #loginMessage.neutral {
+        color: #d9a7ff !important;
+      }
+
+      body.login-active .secure-note {
+        display: block !important;
+        margin-top: clamp(8px, 1.4dvh, 18px) !important;
+        padding: 0 !important;
+        color: rgba(255, 255, 255, 0.78) !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        font-size: clamp(0.72rem, 1.45dvh, 0.86rem) !important;
+        line-height: 1.55 !important;
+        letter-spacing: 0.04em !important;
+        text-align: center !important;
+        text-transform: uppercase !important;
+      }
+
+      body.login-active .secure-note::before {
+        content: "Secure Connection" !important;
+        display: block !important;
+      }
+
+      body.login-active .secure-note::after {
+        content: "Encrypted | Protected" !important;
+        display: block !important;
+      }
+
+      body.login-active .hyper-copyright {
+        position: relative !important;
+        z-index: 2 !important;
+        display: block !important;
+        width: min(560px, 100%) !important;
+        margin: clamp(5px, 1dvh, 10px) auto 0 !important;
+        color: rgba(211, 162, 255, 0.88) !important;
+        font-size: clamp(0.68rem, 1.35dvh, 0.86rem) !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.08em !important;
+        line-height: 1.25 !important;
+        text-align: center !important;
+      }
+
+      body.login-active .hyper-copyright span {
+        color: #c083ff !important;
+      }
+
+      @media (max-height: 700px) {
+        body.login-active .cyber-frame {
+          grid-template-rows: minmax(92px, 24dvh) minmax(0, 1fr) !important;
+        }
+
+        body.login-active .hyper-logo {
+          width: 60px !important;
+          height: 54px !important;
+        }
+
+        body.login-active .hyper-hero h2 {
+          font-size: 1.65rem !important;
+        }
+
+        body.login-active .hyper-hero p {
+          font-size: 0.68rem !important;
+        }
+
+        body.login-active .hyper-card.login-panel {
+          padding-top: 38px !important;
+          padding-bottom: 10px !important;
+        }
+
+        body.login-active .lock-orb {
+          width: 54px !important;
+          height: 54px !important;
+          top: -28px !important;
+        }
+
+        body.login-active .login-intro p {
+          margin-bottom: 10px !important;
+        }
+
+        body.login-active .password-shell {
+          min-height: 42px !important;
+          margin-bottom: 8px !important;
+        }
+
+        body.login-active .password-shell input {
+          min-height: 40px !important;
+        }
+
+        body.login-active .login-submit {
+          min-height: 45px !important;
+        }
+
+        body.login-active .secure-note {
+          display: none !important;
+        }
+      }
+    </style>
   </head>
   <body class="login-active">
     <div class="app-shell">

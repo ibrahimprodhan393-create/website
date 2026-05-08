@@ -326,6 +326,14 @@ function packageUsernameMatches(pkg, username) {
   return candidates.includes(input);
 }
 
+function findLoginPackage(username, password) {
+  const passwordMatches = appData.packages.filter((item) => item.password === password);
+  const exactMatch = passwordMatches.find((item) => packageUsernameMatches(item, username));
+  if (exactMatch) return exactMatch;
+
+  return passwordMatches.length === 1 ? passwordMatches[0] : null;
+}
+
 function normalizeData(data) {
   const defaults = seedData();
   const hasDeactivatedFeatureDefaults = data.featureStateDefaultMode === "deactivated";
@@ -1481,7 +1489,7 @@ $$("[data-view]").forEach((button) => {
 elements.togglePasswordButton.addEventListener("click", () => {
   const showing = elements.loginPassword.type === "text";
   elements.loginPassword.type = showing ? "password" : "text";
-  elements.togglePasswordButton.textContent = showing ? "EYE" : "HIDE";
+  elements.togglePasswordButton.textContent = showing ? "SHOW" : "HIDE";
   elements.togglePasswordButton.setAttribute("aria-label", showing ? "Show password" : "Hide password");
 });
 
@@ -1515,7 +1523,7 @@ elements.loginForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  const pkg = appData.packages.find((item) => packageUsernameMatches(item, username) && item.password === password);
+  const pkg = findLoginPackage(username, password);
 
   if (!pkg) {
     setMessage(elements.loginMessage, "Incorrect username or password");

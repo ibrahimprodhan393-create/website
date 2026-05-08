@@ -204,6 +204,14 @@ function packageUsernameMatches(pkg = {}, username = "") {
   return candidates.includes(input);
 }
 
+function findLoginPackage(packages = [], username = "", password = "") {
+  const passwordMatches = packages.filter((item) => item.password === password);
+  const exactMatch = passwordMatches.find((item) => packageUsernameMatches(item, username));
+  if (exactMatch) return exactMatch;
+
+  return passwordMatches.length === 1 ? passwordMatches[0] : null;
+}
+
 function normalizeData(data = {}) {
   const defaults = seedData();
   return {
@@ -415,7 +423,7 @@ async function handleApi(req, res, pathname) {
         });
       }
 
-      const pkg = data.packages.find((item) => packageUsernameMatches(item, username) && item.password === password);
+      const pkg = findLoginPackage(data.packages, username, password);
       if (!pkg) {
         return sendJson(res, 401, { message: "Incorrect username or password" });
       }
