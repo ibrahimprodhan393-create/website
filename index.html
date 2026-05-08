@@ -1442,6 +1442,7 @@
                   <button class="portal-button primary-portal-button" type="button" id="startInstallButton">Install</button>
                   <button class="portal-button" type="button" id="contactButton">Contact US</button>
                 </div>
+                <div class="contact-choice-panel hidden" id="contactChoicePanel" aria-live="polite"></div>
                 <p class="form-message neutral portal-message" id="contactMessage"></p>
               </header>
 
@@ -1814,8 +1815,15 @@
                     <input id="pkgCertificate" type="text" placeholder="CERT-2222" required>
                   </label>
                   <label>
-                    Contact Info
-                    <input id="pkgContact" type="text" placeholder="WhatsApp: +880...">
+                    WhatsApp Contact
+                    <input id="pkgContact" type="text" placeholder="https://wa.me/8801000000000">
+                  </label>
+                </div>
+
+                <div class="two-column">
+                  <label>
+                    Email Contact
+                    <input id="pkgEmail" type="email" placeholder="support@example.com">
                   </label>
                 </div>
 

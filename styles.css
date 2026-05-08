@@ -351,6 +351,34 @@ body.dashboard-active #userView.active {
   text-shadow: 0 0 18px rgba(255, 255, 255, 0.25);
 }
 
+.contact-choice-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(130px, 170px));
+  justify-content: center;
+  gap: 10px;
+  margin: 10px auto 0;
+}
+
+.contact-choice-panel.hidden {
+  display: none;
+}
+
+.contact-choice-button {
+  min-height: 44px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.56);
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(28, 12, 110, 0.16);
+  font-weight: 900;
+}
+
+.contact-choice-button:hover,
+.contact-choice-button:focus-visible {
+  background: rgba(255, 255, 255, 0.24);
+  outline: none;
+}
+
 .portal-details {
   display: grid;
   gap: 18px;
@@ -2356,6 +2384,11 @@ button.is-loading::before {
 
   .game-inject-actions {
     grid-template-columns: 1fr;
+  }
+
+  .contact-choice-panel {
+    grid-template-columns: 1fr;
+    width: min(220px, 72%);
   }
 
   body.login-active .hyper-login {
