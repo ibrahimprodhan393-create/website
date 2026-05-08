@@ -102,6 +102,10 @@ const elements = {
   adminSettingsMessage: $("#adminSettingsMessage"),
   adminLogoutButton: $("#adminLogoutButton"),
   resetDemoButton: $("#resetDemoButton"),
+  bulkDaysInput: $("#bulkDaysInput"),
+  bulkAddDaysButton: $("#bulkAddDaysButton"),
+  bulkSubtractDaysButton: $("#bulkSubtractDaysButton"),
+  bulkDayMessage: $("#bulkDayMessage"),
   packageForm: $("#packageForm"),
   packageFormTitle: $("#packageFormTitle"),
   packageId: $("#packageId"),
@@ -1057,6 +1061,7 @@ function renderPackageList() {
             <div class="access-meta">
               <span>${status}</span>
               <span>${getValidityDays(pkg)} day(s)</span>
+              <span>Expires: ${formatDate(pkg.expiresAt)}</span>
               <span>${featureTotal} feature(s)</span>
               <span>${lockStatus}</span>
               <span>Web: ${escapeHtml(pkg.webAccessCode)}</span>
@@ -1298,6 +1303,44 @@ function saveAdminSettings(event) {
   };
   saveData();
   setMessage(elements.adminSettingsMessage, "Admin settings saved.", "ok");
+}
+
+function adjustAllSubscriptionDays(direction) {
+  const days = Math.max(1, Math.trunc(Number(elements.bulkDaysInput.value) || 1));
+
+  if (!appData.packages.length) {
+    setMessage(elements.bulkDayMessage, "No subscription packages found.", "neutral");
+    return;
+  }
+
+  const now = Date.now();
+  const delta = direction * days * DAY_MS;
+  appData.packages = appData.packages.map((pkg) => {
+    const currentExpiry = Number(pkg.expiresAt) || now;
+    const baseExpiry = direction > 0 ? Math.max(currentExpiry, now) : currentExpiry;
+    const nextExpiry = Math.max(baseExpiry + delta, now - DAY_MS);
+    const remainingDays = Math.max(1, Math.ceil((nextExpiry - now) / DAY_MS));
+
+    return {
+      ...pkg,
+      validityType: "custom",
+      customDays: remainingDays,
+      expiresAt: nextExpiry
+    };
+  });
+
+  saveData();
+  renderPackageList();
+  const activePackage = getActivePackage();
+  if (activePackage && !adminAuthenticated) renderDashboard(activePackage);
+
+  setMessage(
+    elements.bulkDayMessage,
+    `${direction > 0 ? "Added" : "Removed"} ${days} day(s) ${direction > 0 ? "to" : "from"} ${
+      appData.packages.length
+    } subscription(s).`,
+    "ok"
+  );
 }
 
 function updateConditionalFields() {
@@ -1637,6 +1680,8 @@ elements.certificateForm.addEventListener("submit", async (event) => {
 
 elements.restartFlowButton.addEventListener("click", resetInstallFlow);
 elements.adminSettingsForm.addEventListener("submit", saveAdminSettings);
+elements.bulkAddDaysButton.addEventListener("click", () => adjustAllSubscriptionDays(1));
+elements.bulkSubtractDaysButton.addEventListener("click", () => adjustAllSubscriptionDays(-1));
 elements.packageForm.addEventListener("submit", savePackageFromForm);
 elements.featureForm.addEventListener("submit", saveFeatureFromForm);
 elements.clearPackageFormButton.addEventListener("click", resetPackageForm);

@@ -1652,12 +1652,39 @@
             </div>
           </div>
 
-          <section class="panel admin-settings-panel">
+          <section class="panel admin-quick-panel">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Admin Account</p>
-                <h3>Login & Contact Settings</h3>
+                <p class="eyebrow">Quick Controls</p>
+                <h3>Admin Sections</h3>
               </div>
+            </div>
+            <nav class="admin-section-nav" aria-label="Admin panel sections">
+              <a href="#featureManagementSection">01 Feature Management</a>
+              <a href="#activePackageListSection">02 Active Package List</a>
+              <a href="#packageManagementSection">03 Package Management</a>
+              <a href="#adminContactSection">04 Admin Contact</a>
+            </nav>
+            <div class="bulk-subscription-tool">
+              <label>
+                Bulk Subscription Days
+                <input id="bulkDaysInput" type="number" min="1" step="1" value="1">
+              </label>
+              <div class="button-row">
+                <button class="primary-button" type="button" id="bulkAddDaysButton">Add Days To All</button>
+                <button class="secondary-button" type="button" id="bulkSubtractDaysButton">Remove Days From All</button>
+              </div>
+              <p class="form-message neutral" id="bulkDayMessage" role="alert">Apply day changes to every subscription package at once.</p>
+            </div>
+          </section>
+
+          <section class="panel admin-settings-panel admin-section-panel" id="adminContactSection">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Section 04</p>
+                <h3>Admin Contact & Account</h3>
+              </div>
+              <span class="admin-section-badge">Admin Contact</span>
             </div>
             <form id="adminSettingsForm" class="stacked-form" autocomplete="off">
               <div class="two-column">
@@ -1692,12 +1719,13 @@
           </section>
 
           <div class="admin-grid">
-            <section class="panel admin-panel">
+            <section class="panel admin-panel admin-section-panel" id="packageManagementSection">
               <div class="section-heading">
                 <div>
-                  <p class="eyebrow">Package Management</p>
+                  <p class="eyebrow">Section 03</p>
                   <h3 id="packageFormTitle">Create Package</h3>
                 </div>
+                <span class="admin-section-badge">Package Management</span>
                 <button class="ghost-button compact" type="button" id="clearPackageFormButton">Clear</button>
               </div>
 
@@ -1823,12 +1851,13 @@
               </form>
             </section>
 
-            <section class="panel admin-panel">
+            <section class="panel admin-panel admin-section-panel" id="featureManagementSection">
               <div class="section-heading">
                 <div>
-                  <p class="eyebrow">Features Management</p>
+                  <p class="eyebrow">Section 01</p>
                   <h3 id="featureFormTitle">Add Feature</h3>
                 </div>
+                <span class="admin-section-badge">Feature Management</span>
                 <button class="ghost-button compact" type="button" id="clearFeatureFormButton">Clear</button>
               </div>
 
@@ -1869,12 +1898,13 @@
             </section>
           </div>
 
-          <section class="panel package-list-panel">
+          <section class="panel package-list-panel admin-section-panel" id="activePackageListSection">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Active Packages</p>
-                <h3>Package Access List</h3>
+                <p class="eyebrow">Section 02</p>
+                <h3>Active Package List</h3>
               </div>
+              <span class="admin-section-badge">Package Access</span>
               <span class="count-pill" id="packageCount">0 Packages</span>
             </div>
             <div class="list-stack" id="packageList"></div>

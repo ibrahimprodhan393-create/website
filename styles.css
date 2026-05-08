@@ -1972,6 +1972,118 @@ button.is-loading::before {
   margin-bottom: 16px;
 }
 
+.view.active#adminView {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.view.active#adminView .admin-header {
+  order: 1;
+  margin-bottom: 0;
+}
+
+.view.active#adminView .admin-quick-panel {
+  order: 2;
+}
+
+.view.active#adminView .admin-grid {
+  display: contents;
+}
+
+#featureManagementSection {
+  order: 3;
+}
+
+#activePackageListSection {
+  order: 4;
+}
+
+#packageManagementSection {
+  order: 5;
+}
+
+#adminContactSection {
+  order: 6;
+}
+
+.admin-section-panel {
+  scroll-margin-top: 18px;
+}
+
+.admin-settings-panel.admin-section-panel,
+.package-list-panel.admin-section-panel {
+  margin: 0;
+}
+
+.admin-section-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 4px 10px;
+  color: var(--ink);
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.admin-section-nav {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-section-nav a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 10px;
+  color: var(--ink);
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-align: center;
+  text-decoration: none;
+}
+
+.admin-section-nav a:hover,
+.admin-section-nav a:focus-visible {
+  color: #ffffff;
+  background: var(--ink);
+  outline: none;
+}
+
+.bulk-subscription-tool {
+  display: grid;
+  grid-template-columns: minmax(190px, 260px) minmax(260px, auto);
+  gap: 12px;
+  align-items: end;
+  margin-top: 14px;
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.bulk-subscription-tool label {
+  margin: 0;
+}
+
+.bulk-subscription-tool .button-row {
+  align-items: end;
+}
+
+.bulk-subscription-tool .form-message {
+  grid-column: 1 / -1;
+  margin-top: 0;
+}
+
 .stacked-form {
   display: grid;
   gap: 14px;
@@ -2109,6 +2221,14 @@ button.is-loading::before {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .admin-section-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bulk-subscription-tool {
+    grid-template-columns: 1fr;
+  }
+
   .switch-button {
     flex: 1 1 0;
   }
@@ -2178,10 +2298,16 @@ button.is-loading::before {
 
   .two-column,
   #featurePicker,
+  .admin-section-nav,
   .input-action,
   .copy-row,
   .access-row {
     grid-template-columns: 1fr;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .input-action,
