@@ -10,14 +10,14 @@ const ACTION_DELAY_MIN_MS = 2000;
 const ACTION_DELAY_MAX_MS = 5000;
 const FINAL_PHASE_MINUTES = 10;
 const FINAL_PHASE_MESSAGES = [
-  "10 Minute Security Protection Checking",
-  "10 Minute Device Module Checking",
-  "10 Minute Firewall Checking",
-  "10 Minute Firewall and Firmware Initialization Checking",
-  "10 Minute Web Activation Checking",
-  "10 Minute All Function and Feature Checking",
-  "10 Minute Device Module Final Checking",
-  "10 Minute Access Stability Checking"
+  "Security Protection Checking",
+  "Device Module Checking",
+  "Firewall Checking",
+  "Firewall and Firmware Initialization Checking",
+  "Web Activation Checking",
+  "All Function and Feature Checking",
+  "Device Module Final Checking",
+  "Access Stability Checking"
 ];
 
 const $ = (selector) => document.querySelector(selector);
