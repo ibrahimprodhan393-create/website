@@ -318,6 +318,11 @@ function makeDefaultUsername(pkg) {
     .slice(0, 32) || "user";
 }
 
+function cleanAccessValue(value) {
+  const text = String(value ?? "").trim();
+  return text && text.toLowerCase() !== "undefined" ? text : "";
+}
+
 function packageUsernameMatches(pkg, username) {
   const input = String(username || "").trim().toLowerCase();
   const candidates = [pkg.username, makeDefaultUsername(pkg), pkg.name, pkg.id]
@@ -361,7 +366,8 @@ function normalizeData(data) {
     userFeatureStates: hasDeactivatedFeatureDefaults ? data.userFeatureStates || {} : {},
     packages: (data.packages || defaults.packages).map((pkg) => ({
       ...pkg,
-      username: makeDefaultUsername(pkg),
+      username: cleanAccessValue(pkg.username) || makeDefaultUsername(pkg),
+      password: cleanAccessValue(pkg.password),
       deviceName: pkg.deviceName || "Registered Device",
       legalInfo: pkg.legalInfo || "Legal and regulatory access details are assigned by the admin.",
       packageDetails: pkg.packageDetails || "Package details are assigned by the admin.",
@@ -461,9 +467,20 @@ async function loadPublicSettings() {
 }
 
 function mergeActivePackage(pkg) {
+  const existing = appData.packages.find((item) => item.id === pkg.id) || {};
+  const merged = {
+    ...existing,
+    ...pkg,
+    username: cleanAccessValue(pkg.username) || cleanAccessValue(existing.username) || makeDefaultUsername(pkg),
+    password: cleanAccessValue(pkg.password) || cleanAccessValue(existing.password),
+    deviceSerial: cleanAccessValue(pkg.deviceSerial) || cleanAccessValue(existing.deviceSerial),
+    webAccessCode: cleanAccessValue(pkg.webAccessCode) || cleanAccessValue(existing.webAccessCode),
+    certificateCode: cleanAccessValue(pkg.certificateCode) || cleanAccessValue(existing.certificateCode)
+  };
+
   appData.packages = [
     ...appData.packages.filter((item) => item.id !== pkg.id),
-    pkg
+    merged
   ];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
 }
@@ -1116,7 +1133,7 @@ function renderPackageList() {
         <article class="access-row">
           <div>
             <h4>${escapeHtml(pkg.name)}</h4>
-            <p>Username: ${escapeHtml(pkg.username)} | Password: ${escapeHtml(pkg.password)} | Device: ${escapeHtml(pkg.deviceName || "Registered Device")} | Serial: ${escapeHtml(pkg.deviceSerial)}</p>
+            <p>Username: ${escapeHtml(cleanAccessValue(pkg.username) || "Not set")} | Password: ${escapeHtml(cleanAccessValue(pkg.password) || "Not set")} | Device: ${escapeHtml(pkg.deviceName || "Registered Device")} | Serial: ${escapeHtml(pkg.deviceSerial)}</p>
             <div class="access-meta">
               <span>${status}</span>
               <span>${getValidityDays(pkg)} day(s)</span>
@@ -1171,7 +1188,7 @@ function fillPackageForm(pkg) {
   elements.savePackageButton.textContent = "Update Package";
   elements.pkgName.value = pkg.name;
   elements.pkgUsername.value = pkg.username || makeDefaultUsername(pkg);
-  elements.pkgPassword.value = pkg.password;
+  elements.pkgPassword.value = cleanAccessValue(pkg.password);
   elements.pkgValidity.value = pkg.validityType;
   elements.pkgCustomDays.value = pkg.customDays || getValidityDays(pkg);
   elements.pkgStatusInput.value = pkg.status;
@@ -1201,12 +1218,13 @@ function savePackageFromForm(event) {
 
   const id = elements.packageId.value || makeId("pkg");
   const existing = appData.packages.find((pkg) => pkg.id === id);
-  const username = elements.pkgUsername.value.trim();
+  const username = cleanAccessValue(elements.pkgUsername.value);
+  const packagePassword = cleanAccessValue(elements.pkgPassword.value) || cleanAccessValue(existing?.password);
   const duplicateUsername = appData.packages.some(
     (pkg) => pkg.id !== id && String(pkg.username || "").toLowerCase() === username.toLowerCase()
   );
   const duplicatePassword = appData.packages.some(
-    (pkg) => pkg.id !== id && pkg.password === elements.pkgPassword.value.trim()
+    (pkg) => pkg.id !== id && cleanAccessValue(pkg.password) === packagePassword
   );
   const duplicateSerial = appData.packages.some(
     (pkg) => pkg.id !== id && pkg.deviceSerial === elements.pkgSerial.value.trim()
@@ -1217,6 +1235,16 @@ function savePackageFromForm(event) {
   const duplicateCertificate = appData.packages.some(
     (pkg) => pkg.id !== id && pkg.certificateCode === elements.pkgCertificate.value.trim()
   );
+
+  if (!username) {
+    setMessage(elements.packageFormMessage, "Package username is required.");
+    return;
+  }
+
+  if (!packagePassword) {
+    setMessage(elements.packageFormMessage, "Package password is required and will stay saved until you delete this package.");
+    return;
+  }
 
   if (duplicateUsername) {
     setMessage(elements.packageFormMessage, "This username is already used by another package.");
@@ -1258,7 +1286,7 @@ function savePackageFromForm(event) {
     id,
     name: elements.pkgName.value.trim(),
     username,
-    password: elements.pkgPassword.value.trim(),
+    password: packagePassword,
     validityType,
     customDays: validityDays,
     createdAt: existing?.createdAt || now,

@@ -196,6 +196,11 @@ function makeDefaultUsername(pkg = {}) {
     .slice(0, 32) || "user";
 }
 
+function cleanAccessValue(value) {
+  const text = String(value ?? "").trim();
+  return text && text.toLowerCase() !== "undefined" ? text : "";
+}
+
 function packageUsernameMatches(pkg = {}, username = "") {
   const input = String(username || "").trim().toLowerCase();
   const candidates = [pkg.username, makeDefaultUsername(pkg), pkg.name, pkg.id]
@@ -234,7 +239,8 @@ function normalizeData(data = {}) {
     })),
     packages: (data.packages || defaults.packages).map((pkg) => ({
       ...pkg,
-      username: makeDefaultUsername(pkg),
+      username: cleanAccessValue(pkg.username) || makeDefaultUsername(pkg),
+      password: cleanAccessValue(pkg.password),
       featureIds: Array.isArray(pkg.featureIds) ? pkg.featureIds : [],
       deviceName: pkg.deviceName || "Registered Device",
       legalInfo: pkg.legalInfo || "Legal and regulatory access details are assigned by the admin.",
@@ -243,6 +249,21 @@ function normalizeData(data = {}) {
       deviceLockId: pkg.deviceLockId || "",
       deviceLockedAt: pkg.deviceLockedAt || null
     }))
+  };
+}
+
+function preserveStoredPackagePasswords(incomingData = {}, storedData = {}) {
+  const storedById = new Map((storedData.packages || []).map((pkg) => [pkg.id, pkg]));
+  const incomingPackages = Array.isArray(incomingData.packages) ? incomingData.packages : storedData.packages || [];
+  return {
+    ...incomingData,
+    packages: incomingPackages.map((pkg) => {
+      const stored = storedById.get(pkg.id) || {};
+      return {
+        ...pkg,
+        password: cleanAccessValue(pkg.password) || cleanAccessValue(stored.password)
+      };
+    })
   };
 }
 
@@ -470,9 +491,13 @@ async function handleApi(req, res, pathname) {
       return sendJson(res, 401, { message: "Admin session expired" });
     }
     const body = await readJsonBody(req);
-    const nextData = normalizeData(body.data || {});
+    const storedData = await readStore();
+    const nextData = normalizeData(preserveStoredPackagePasswords(body.data || {}, storedData));
     if (!String(nextData.settings?.adminPassword || "").trim()) {
       return sendJson(res, 400, { message: "Admin password cannot be empty" });
+    }
+    if (nextData.packages.some((pkg) => !cleanAccessValue(pkg.password))) {
+      return sendJson(res, 400, { message: "Package password cannot be empty" });
     }
     await writeStore(nextData);
     return sendJson(res, 200, { ok: true, data: nextData });
