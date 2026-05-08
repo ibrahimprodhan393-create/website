@@ -351,6 +351,45 @@ body.dashboard-active #userView.active {
   text-shadow: 0 0 18px rgba(255, 255, 255, 0.25);
 }
 
+.contact-options {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.contact-choice-title {
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 800;
+}
+
+.contact-choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.contact-choice-button {
+  min-height: 38px;
+  padding: 0 14px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.contact-choice-button.whatsapp {
+  border-color: rgba(57, 255, 152, 0.36);
+  box-shadow: 0 0 18px rgba(57, 255, 152, 0.12);
+}
+
+.contact-choice-button.email {
+  border-color: rgba(122, 227, 255, 0.42);
+  box-shadow: 0 0 18px rgba(122, 227, 255, 0.14);
+}
+
 .portal-details {
   display: grid;
   gap: 18px;
@@ -617,6 +656,14 @@ body.dashboard-active .feature-card {
 .game-inject-actions .portal-button:hover {
   border-color: rgba(122, 227, 255, 0.48);
   box-shadow: 0 0 30px rgba(122, 227, 255, 0.18);
+}
+
+.game-inject-actions .setup-focus-button {
+  grid-column: 1 / -1;
+  background:
+    linear-gradient(135deg, rgba(57, 255, 152, 0.16), rgba(181, 108, 255, 0.2)),
+    rgba(255, 255, 255, 0.1);
+  border-color: rgba(57, 255, 152, 0.38);
 }
 
 .subscription-panel {

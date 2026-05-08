@@ -59,6 +59,7 @@ const elements = {
   featureActionMessage: $("#featureActionMessage"),
   freeFireButton: $("#freeFireButton"),
   freeFireMaxButton: $("#freeFireMaxButton"),
+  setupFocusButton: $("#setupFocusButton"),
   gameInjectMessage: $("#gameInjectMessage"),
   subscriptionCountdown: $("#subscriptionCountdown"),
   subscriptionCountdownText: $("#subscriptionCountdownText"),
@@ -100,6 +101,8 @@ const elements = {
   adminPasswordInput: $("#adminPasswordInput"),
   adminContactLabel: $("#adminContactLabel"),
   adminContactValue: $("#adminContactValue"),
+  adminWhatsappContact: $("#adminWhatsappContact"),
+  adminEmailContact: $("#adminEmailContact"),
   adminContactMode: $("#adminContactMode"),
   adminSettingsMessage: $("#adminSettingsMessage"),
   adminLogoutButton: $("#adminLogoutButton"),
@@ -204,6 +207,8 @@ function seedData() {
       adminPassword: DEFAULT_ADMIN_PASSWORD,
       contactLabel: "WhatsApp Admin",
       contactValue: "https://wa.me/8801000000000",
+      contactWhatsapp: "https://wa.me/8801000000000",
+      contactEmail: "support@example.com",
       contactMode: "auto"
     },
     featureStateDefaultMode: "deactivated",
@@ -475,7 +480,9 @@ function mergeActivePackage(pkg) {
     password: cleanAccessValue(pkg.password) || cleanAccessValue(existing.password),
     deviceSerial: cleanAccessValue(pkg.deviceSerial) || cleanAccessValue(existing.deviceSerial),
     webAccessCode: cleanAccessValue(pkg.webAccessCode) || cleanAccessValue(existing.webAccessCode),
-    certificateCode: cleanAccessValue(pkg.certificateCode) || cleanAccessValue(existing.certificateCode)
+    certificateCode: cleanAccessValue(pkg.certificateCode) || cleanAccessValue(existing.certificateCode),
+    deviceLockId: cleanAccessValue(existing.deviceLockId) || (pkg.deviceLocked ? deviceId : cleanAccessValue(pkg.deviceLockId)),
+    deviceLockedAt: pkg.deviceLockedAt || existing.deviceLockedAt || (pkg.deviceLocked ? Date.now() : null)
   };
 
   appData.packages = [
@@ -1390,6 +1397,8 @@ function renderAdminSettings() {
   elements.adminPasswordInput.value = settings.adminPassword || DEFAULT_ADMIN_PASSWORD;
   elements.adminContactLabel.value = settings.contactLabel || "";
   elements.adminContactValue.value = settings.contactValue || "";
+  elements.adminWhatsappContact.value = settings.contactWhatsapp || (/wa\.me|whats\s*app|\+?\d[\d\s().-]{7,}/i.test(settings.contactValue || "") ? settings.contactValue || "" : "");
+  elements.adminEmailContact.value = settings.contactEmail || (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.contactValue || "") ? settings.contactValue || "" : "");
   elements.adminContactMode.value = settings.contactMode || "auto";
 }
 
@@ -1408,6 +1417,8 @@ function saveAdminSettings(event) {
     adminPassword: nextAdminPassword,
     contactLabel: elements.adminContactLabel.value.trim(),
     contactValue: elements.adminContactValue.value.trim(),
+    contactWhatsapp: elements.adminWhatsappContact.value.trim(),
+    contactEmail: elements.adminEmailContact.value.trim(),
     contactMode: elements.adminContactMode.value
   };
   saveData();
@@ -1512,6 +1523,78 @@ function getContactTarget(value) {
   return "";
 }
 
+function getContactType(value) {
+  const contact = (value || "").trim();
+  const target = getContactTarget(contact);
+  if (/^mailto:/i.test(target) || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) return "email";
+  if (/wa\.me|whats\s*app/i.test(contact) || /wa\.me/i.test(target) || /^\+?\d[\d\s().-]{7,}$/.test(contact)) {
+    return "whatsapp";
+  }
+  return "link";
+}
+
+function addContactOption(options, value, label, mode = "auto") {
+  const contact = (value || "").trim();
+  const target = getContactTarget(contact);
+  if (!contact || !target) return;
+
+  const key = target.toLowerCase();
+  if (options.some((option) => option.key === key)) return;
+
+  options.push({
+    key,
+    contact,
+    label,
+    mode,
+    type: getContactType(contact)
+  });
+}
+
+function getAvailableContactOptions(pkg) {
+  const settings = appData.settings || {};
+  const options = [];
+
+  addContactOption(options, settings.contactWhatsapp, "WhatsApp", "auto");
+  addContactOption(options, settings.contactEmail, "Email", "auto");
+  addContactOption(options, settings.contactValue, settings.contactLabel || "Admin Contact", settings.contactMode || "auto");
+  addContactOption(options, pkg?.contactInfo || "", "Package Contact", "auto");
+
+  return options.sort((a, b) => {
+    const order = { whatsapp: 0, email: 1, link: 2 };
+    return order[a.type] - order[b.type];
+  });
+}
+
+function renderContactOptions(options, messageElement) {
+  if (!options.length) {
+    setMessage(messageElement, "No contact info set.", "neutral");
+    return;
+  }
+
+  messageElement.classList.remove("ok");
+  messageElement.classList.add("neutral");
+  messageElement.innerHTML = `
+    <span class="contact-choice-title">Choose contact option</span>
+    <span class="contact-choice-row">
+      ${options
+        .map(
+          (option) => `
+            <button
+              class="contact-choice-button ${option.type}"
+              type="button"
+              data-contact-value="${escapeHtml(option.contact)}"
+              data-contact-label="${escapeHtml(option.label)}"
+              data-contact-mode="${escapeHtml(option.mode)}"
+            >
+              ${escapeHtml(option.label)}
+            </button>
+          `
+        )
+        .join("")}
+    </span>
+  `;
+}
+
 function openOrCopyContact({ contact, label, mode = "auto", messageElement }) {
   const value = (contact || "").trim();
 
@@ -1603,6 +1686,17 @@ elements.loginForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  if (pkg.deviceLockId && pkg.deviceLockId !== deviceId) {
+    setMessage(elements.loginMessage, "Already used on another device");
+    return;
+  }
+
+  if (!pkg.deviceLockId) {
+    pkg.deviceLockId = deviceId;
+    pkg.deviceLockedAt = Date.now();
+    saveData();
+  }
+
   activePackageId = pkg.id;
   setMessage(elements.loginMessage, "");
   renderDashboard(pkg);
@@ -1639,18 +1733,24 @@ elements.freeFireMaxButton.addEventListener("click", async () => {
   if (ready) showAnimatedMessage(elements.gameInjectMessage, "Free Fire Max Injected", "ok");
 });
 
+elements.setupFocusButton.addEventListener("click", async () => {
+  const ready = await runButtonLoading(elements.setupFocusButton, "Setting up...");
+  if (ready) showAnimatedMessage(elements.gameInjectMessage, "Setup on your focus completed.", "ok");
+});
+
 elements.contactButton.addEventListener("click", () => {
   const pkg = getActivePackage();
-  const contact = pkg?.contactInfo || appData.settings?.contactValue || "";
-  if (!contact) {
-    setMessage(elements.contactMessage, "No contact info set.", "neutral");
-    return;
-  }
+  renderContactOptions(getAvailableContactOptions(pkg), elements.contactMessage);
+});
+
+elements.contactMessage.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-contact-value]");
+  if (!button) return;
 
   openOrCopyContact({
-    contact,
-    label: pkg?.contactInfo ? "Package contact" : appData.settings?.contactLabel || "Admin contact",
-    mode: "auto",
+    contact: button.dataset.contactValue,
+    label: button.dataset.contactLabel,
+    mode: button.dataset.contactMode || "auto",
     messageElement: elements.contactMessage
   });
 });
@@ -1841,7 +1941,7 @@ elements.featureList.addEventListener("click", (event) => {
   }
 });
 
-elements.packageList.addEventListener("click", (event) => {
+elements.packageList.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-package-action]");
   if (!button) return;
 
@@ -1861,10 +1961,31 @@ elements.packageList.addEventListener("click", (event) => {
 
   if (button.dataset.packageAction === "unlock") {
     if (!window.confirm("Reset the saved device for this package?")) return;
+
+    if (adminToken) {
+      try {
+        const payload = await apiRequest("/api/admin/reset-device-lock", {
+          method: "POST",
+          body: { packageId: pkg.id }
+        });
+        appData = normalizeData(payload.data || appData);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        renderAdmin();
+        setMessage(elements.packageFormMessage, "Device lock reset. This package can now be used on another device.", "ok");
+        return;
+      } catch (error) {
+        if (!isMissingApiError(error)) {
+          setMessage(elements.packageFormMessage, error.message || "Device lock reset failed.");
+          return;
+        }
+      }
+    }
+
     pkg.deviceLockId = "";
     pkg.deviceLockedAt = null;
     saveData();
     renderPackageList();
+    setMessage(elements.packageFormMessage, "Device lock reset. This package can now be used on another device.", "ok");
   }
 
   if (button.dataset.packageAction === "delete") {

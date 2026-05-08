@@ -3449,7 +3449,7 @@
                   <button class="portal-button primary-portal-button" type="button" id="startInstallButton">Install</button>
                   <button class="portal-button" type="button" id="contactButton">Contact US</button>
                 </div>
-                <p class="form-message neutral portal-message" id="contactMessage"></p>
+                <div class="form-message neutral portal-message contact-options" id="contactMessage"></div>
               </header>
 
               <section class="portal-details" aria-label="Access details">
@@ -3521,6 +3521,7 @@
                 <div class="game-inject-actions">
                   <button class="portal-button" type="button" id="freeFireButton">Free Fire</button>
                   <button class="portal-button" type="button" id="freeFireMaxButton">Free Fire Max</button>
+                  <button class="portal-button setup-focus-button" type="button" id="setupFocusButton">Setup on Your Focus</button>
                 </div>
                 <p class="feature-action-message" id="gameInjectMessage" aria-live="polite"></p>
               </section>
@@ -3712,6 +3713,14 @@
                 <label>
                   Selected Contact
                   <input id="adminContactValue" type="text" placeholder="https://wa.me/8801000000000">
+                </label>
+                <label>
+                  WhatsApp Contact
+                  <input id="adminWhatsappContact" type="text" placeholder="https://wa.me/8801000000000">
+                </label>
+                <label>
+                  Email Contact
+                  <input id="adminEmailContact" type="email" placeholder="support@example.com">
                 </label>
                 <label>
                   Contact Action

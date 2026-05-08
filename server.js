@@ -94,6 +94,8 @@ function seedData() {
       adminPassword: DEFAULT_ADMIN_PASSWORD,
       contactLabel: "WhatsApp Admin",
       contactValue: "https://wa.me/8801000000000",
+      contactWhatsapp: "https://wa.me/8801000000000",
+      contactEmail: "support@example.com",
       contactMode: "auto"
     },
     featureStateDefaultMode: "deactivated",
@@ -252,16 +254,19 @@ function normalizeData(data = {}) {
   };
 }
 
-function preserveStoredPackagePasswords(incomingData = {}, storedData = {}) {
+function preserveStoredPackageServerState(incomingData = {}, storedData = {}) {
   const storedById = new Map((storedData.packages || []).map((pkg) => [pkg.id, pkg]));
   const incomingPackages = Array.isArray(incomingData.packages) ? incomingData.packages : storedData.packages || [];
   return {
     ...incomingData,
     packages: incomingPackages.map((pkg) => {
       const stored = storedById.get(pkg.id) || {};
+      const storedLockId = cleanAccessValue(stored.deviceLockId);
       return {
         ...pkg,
-        password: cleanAccessValue(pkg.password) || cleanAccessValue(stored.password)
+        password: cleanAccessValue(pkg.password) || cleanAccessValue(stored.password),
+        deviceLockId: cleanAccessValue(pkg.deviceLockId) || storedLockId,
+        deviceLockedAt: cleanAccessValue(pkg.deviceLockId) ? pkg.deviceLockedAt || stored.deviceLockedAt || null : stored.deviceLockedAt || pkg.deviceLockedAt || null
       };
     })
   };
@@ -343,6 +348,8 @@ function publicSettings(settings = {}) {
   return {
     contactLabel: settings.contactLabel || "",
     contactValue: settings.contactValue || "",
+    contactWhatsapp: settings.contactWhatsapp || "",
+    contactEmail: settings.contactEmail || "",
     contactMode: settings.contactMode || "auto"
   };
 }
@@ -492,7 +499,7 @@ async function handleApi(req, res, pathname) {
     }
     const body = await readJsonBody(req);
     const storedData = await readStore();
-    const nextData = normalizeData(preserveStoredPackagePasswords(body.data || {}, storedData));
+    const nextData = normalizeData(preserveStoredPackageServerState(body.data || {}, storedData));
     if (!String(nextData.settings?.adminPassword || "").trim()) {
       return sendJson(res, 400, { message: "Admin password cannot be empty" });
     }
@@ -501,6 +508,27 @@ async function handleApi(req, res, pathname) {
     }
     await writeStore(nextData);
     return sendJson(res, 200, { ok: true, data: nextData });
+  }
+
+  if (req.method === "POST" && pathname === "/api/admin/reset-device-lock") {
+    if (!requireAdmin(req)) {
+      return sendJson(res, 401, { message: "Admin session expired" });
+    }
+
+    const body = await readJsonBody(req);
+    const packageId = String(body.packageId || "").trim();
+
+    return withStoreUpdate((data) => {
+      const pkg = data.packages.find((item) => item.id === packageId);
+      if (!pkg) {
+        return sendJson(res, 404, { message: "Package not found" });
+      }
+
+      pkg.deviceLockId = "";
+      pkg.deviceLockedAt = null;
+
+      return sendJson(res, 200, { ok: true, data });
+    });
   }
 
   if (req.method === "POST" && ["/api/verify-serial", "/api/verify-web-code", "/api/verify-certificate"].includes(pathname)) {
