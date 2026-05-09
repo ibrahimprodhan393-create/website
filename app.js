@@ -1408,16 +1408,23 @@ function savePackageFromForm(event) {
   });
   const featureIds = $$('input[name="featurePick"]:checked').map((input) => input.value);
   const now = Date.now();
+  const existingExpiresAt = Number(existing?.expiresAt);
+  const packageExpiresAt =
+    existing && Number.isFinite(existingExpiresAt) && existingExpiresAt > 0
+      ? existingExpiresAt
+      : now + validityDays * DAY_MS;
+  const packageValidityType = existing ? existing.validityType || validityType : validityType;
+  const packageCustomDays = existing ? existing.customDays || getValidityDays(existing) : validityDays;
 
   const packageData = {
     id,
     name: elements.pkgName.value.trim(),
     username,
     password: packagePassword,
-    validityType,
-    customDays: validityDays,
+    validityType: packageValidityType,
+    customDays: packageCustomDays,
     createdAt: existing?.createdAt || now,
-    expiresAt: now + validityDays * DAY_MS,
+    expiresAt: packageExpiresAt,
     status: elements.pkgStatusInput.value,
     deviceSerial: elements.pkgSerial.value.trim(),
     deviceName: elements.pkgDeviceName.value.trim() || "Registered Device",
@@ -1449,7 +1456,11 @@ function savePackageFromForm(event) {
     if (activePackage) renderDashboardDetails(activePackage);
   }
   resetPackageForm();
-  setMessage(elements.packageFormMessage, existing ? "Package updated." : "Package created.", "ok");
+  setMessage(
+    elements.packageFormMessage,
+    existing ? "Package updated. Expiry time kept unchanged." : "Package created.",
+    "ok"
+  );
 }
 
 function resetFeatureForm() {
